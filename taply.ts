@@ -21,11 +21,6 @@ export interface Feedback {
   createdAt: string; // ISO string
 }
 
-// ---------------------------------------------------
-// فرمت ریسپانس‌های API
-// فرانت‌اند دولوپر از اینا استفاده می‌کنه
-// ---------------------------------------------------
-
 // POST /api/designs
 export interface UploadDesignResponse {
   id: string;
