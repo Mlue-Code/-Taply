@@ -18,7 +18,7 @@ export function Header() {
             Dashboard
           </Link>
           <Link
-            href="/login"
+            href="/"
             className="rounded-full bg-white/10 px-4 py-2 text-white transition hover:bg-white/15"
           >
             Account
