@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="a" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420.02 160.95">
+  <defs>
+    <style>
+      .b, .c, .d {
+        fill: none;
+        stroke: #7021f8;
+        stroke-width: 20px;
+      }
+
+      .b, .d {
+        stroke-miterlimit: 10;
+      }
+
+      .c {
+        stroke-linejoin: round;
+      }
+
+      .c, .d {
+        stroke-linecap: round;
+      }
+    </style>
+  </defs>
+  <g>
+    <path class="c" d="M25.15,23.64v67.25c0,13.35,10.82,24.17,24.17,24.17h5.4"/>
+    <line class="c" x1="10" y1="46.26" x2="58.35" y2="46.26"/>
+  </g>
+  <g>
+    <circle class="c" cx="119.64" cy="81.31" r="35.4"/>
+    <line class="c" x1="155.07" y1="117.53" x2="155.07" y2="84.73"/>
+  </g>
+  <g>
+    <circle class="c" cx="229.77" cy="81.09" r="35.4"/>
+    <line class="c" x1="194.34" y1="150.95" x2="194.34" y2="84.5"/>
+  </g>
+  <line class="c" x1="306.95" y1="116.19" x2="306.95" y2="10"/>
+  <g>
+    <path class="b" d="M348.28,88.1c.1,15.89,13.98,28.94,30.85,28.94s30.77-13.05,30.86-28.94"/>
+    <path class="d" d="M409.88,115.06h.14c0,19.42-15.66,35.4-34.7,35.4-6.13,0-12.14-1.66-17.41-4.79"/>
+    <line class="c" x1="348.29" y1="46.04" x2="348.29" y2="88.31"/>
+    <line class="c" x1="410.01" y1="46.04" x2="410.01" y2="116.75"/>
+  </g>
+</svg>
