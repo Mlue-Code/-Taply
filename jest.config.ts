@@ -1,9 +1,14 @@
-import type { NextConfig } from "next";
+import type { Config } from "jest";
 
-const nextConfig: NextConfig = {
-  turbopack: {
-    root: __dirname,
+const config: Config = {
+  preset: "ts-jest",
+  testEnvironment: "node",
+  roots: ["<rootDir>/__tests__"],
+  testMatch: ["**/*.test.ts"],
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1",
   },
+  setupFiles: ["<rootDir>/jest.setup.ts"],
 };
 
-export default nextConfig;
+export default config;
