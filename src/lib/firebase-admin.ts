@@ -1,12 +1,10 @@
-import * as admin from "firebase-admin";
+import { initializeApp, getApps, cert, App } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
 
-// =====================================================
-// Firebase Admin SDK - Server-side only
-// Used for Firestore and Authentication only
-// (Cloudinary is used for file and image storage)
-// =====================================================
+let app: App;
 
-if (!admin.apps.length) {
+if (getApps().length === 0) {
   const privateKey = process.env.FIREBASE_PRIVATE_KEY
     ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
     : undefined;
@@ -17,13 +15,13 @@ if (!admin.apps.length) {
     !privateKey
   ) {
     throw new Error(
-      " Firebase Admin SDK: Required environment variables not found.\n" +
-        "Please make sure your .env.local file is configured correctly.",
+      "❌ Firebase Admin SDK: متغیرهای محیطی پیدا نشد!\n" +
+        "مطمئن شو .env.local درست پر شده.",
     );
   }
 
-  admin.initializeApp({
-    credential: admin.credential.cert({
+  app = initializeApp({
+    credential: cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: privateKey,
@@ -31,10 +29,11 @@ if (!admin.apps.length) {
   });
 
   console.log("Firebase Admin SDK initialized");
+} else {
+  app = getApps()[0];
 }
 
-// export سرویس‌ها
-export const adminDb = admin.firestore();
-export const adminAuth = admin.auth();
+export const adminDb = getFirestore(app);
+export const adminAuth = getAuth(app);
 
-export default admin;
+export default app;
