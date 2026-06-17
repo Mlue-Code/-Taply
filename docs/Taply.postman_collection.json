@@ -1,0 +1,103 @@
+{
+  "info": {
+    "name": "Taply API",
+    "description": "API endpoints for Taply MVP",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "firebaseToken",
+      "value": "PASTE_YOUR_FIREBASE_TOKEN_HERE",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Upload Design",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{firebaseToken}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": [],
+              "description": "Image file (max 10MB)"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/designs",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "designs"]
+        },
+        "description": "Upload a new design image. Requires Firebase Authentication."
+      },
+      "response": [
+        {
+          "name": "Success - 201",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebaseToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/designs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "designs"]
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": \"abc123xyz\",\n  \"shareableId\": \"ckpqr5w8x000abc\",\n  \"imageUrl\": \"https://res.cloudinary.com/taply/image/upload/v1234/design.jpg\",\n  \"createdAt\": \"2025-01-15T10:30:00.000Z\"\n}"
+        },
+        {
+          "name": "Error - Missing Auth",
+          "status": "Unauthorized",
+          "code": 401,
+          "_postman_previewlanguage": "json",
+          "body": "{\n  \"error\": \"UNAUTHORIZED\",\n  \"message\": \"Authorization header missing\"\n}"
+        },
+        {
+          "name": "Error - Invalid File",
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "body": "{\n  \"error\": \"VALIDATION_ERROR\",\n  \"message\": \"Only image files are allowed\"\n}"
+        }
+      ]
+    }
+  ]
+}
