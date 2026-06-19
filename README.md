@@ -336,21 +336,6 @@ Included:
 
 ✅ Responsive Interface
 
----
-
-Not Included:
-
-❌ User Dashboard
-
-❌ Project Management
-
-❌ Team Collaboration
-
-❌ Notifications
-
-❌ Design Versioning
-
-❌ Authentication UI
 
 ---
 
