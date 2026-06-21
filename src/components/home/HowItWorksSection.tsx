@@ -23,23 +23,23 @@ export default function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="relative z-10 mx-auto mt-24 max-w-[1120px] px-6 pb-24 lg:px-10"
+      className="relative z-10 mx-auto mt-24 max-w-[1110px] px-6 pb-24 lg:px-0"
     >
-      <div className="rounded-[12px] border border-border-subtle bg-bg-subtle px-8 py-16">
-        <h2 className="text-center text-[38px] font-semibold leading-tight text-[#22202a]">
+      <div className="rounded-[12px] border border-[#ece6ff] bg-bg-subtle px-8 py-16">
+        <h2 className="text-center text-[40px] font-semibold leading-tight text-[#22202a]">
           How it works
         </h2>
 
-        <div className="mx-auto mt-12 grid max-w-[860px] gap-12 md:grid-cols-2">
+        <div className="mx-auto mt-12 grid max-w-[860px] gap-16 md:grid-cols-2">
           <div>
-            <h3 className="text-[20px] font-semibold text-[#22202a]">
+            <h3 className="text-[18px] font-semibold text-[#22202a]">
               For Designers
             </h3>
             <ol className="mt-5 space-y-4">
               {designerSteps.map((step, index) => (
                 <li
                   key={step}
-                  className="flex items-center gap-2 text-[16px] text-[#77737f]"
+                  className="flex items-center gap-2 text-[15px] text-[#77737f]"
                 >
                   <span className="inline-flex h-4 w-4 items-center justify-center rounded-[4px] bg-primary text-[10px] font-semibold text-white">
                     {index + 1}
@@ -51,14 +51,14 @@ export default function HowItWorksSection() {
           </div>
 
           <div>
-            <h3 className="text-[20px] font-semibold text-[#22202a]">
+            <h3 className="text-[18px] font-semibold text-[#22202a]">
               For Clients
             </h3>
             <ol className="mt-5 space-y-4">
               {clientSteps.map((step) => (
                 <li
                   key={step}
-                  className="flex items-center gap-2 text-[16px] text-[#77737f]"
+                  className="flex items-center gap-2 text-[15px] text-[#77737f]"
                 >
                   <AssetIcon src={fluentCheckBox} className="h-5 w-5 shrink-0" />
                   {step}

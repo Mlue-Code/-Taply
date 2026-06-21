@@ -7,12 +7,12 @@ export default function SectionDecorations() {
     <>
       <AssetIcon
         src={blob2}
-        className="pointer-events-none absolute left-[-10px] top-[300px] z-0 h-[228px] w-[218px]"
+        className="pointer-events-none absolute left-[-92px] top-[1462px] z-0 h-[236px] w-[224px]"
       />
 
       <AssetIcon
         src={blob3}
-        className="pointer-events-none absolute right-[-70px] top-[760px] z-0 h-[228px] w-[8px]"
+        className="pointer-events-none absolute right-[-74px] top-[1238px] z-0 h-[236px] w-[226px]"
       />
     </>
   );
