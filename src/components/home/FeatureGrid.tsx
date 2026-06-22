@@ -32,7 +32,7 @@ const features = [
 
 export default function FeatureGrid() {
   return (
-    <section className="relative z-10 mx-auto grid max-w-[1120px] gap-6 px-6 md:grid-cols-3 lg:px-10">
+    <section className="relative z-10 mx-auto grid max-w-[1110px] gap-5 px-6 md:grid-cols-3 lg:px-0">
       {features.map((feature) => {
         const iconClass =
           feature.tone === "violet"
@@ -44,21 +44,21 @@ export default function FeatureGrid() {
         return (
           <article
             key={feature.title}
-            className="rounded-[12px] border border-border-default bg-[#fcfbff] p-6 shadow-[0_10px_22px_rgba(67,40,130,0.05)]"
+            className="rounded-[14px] border border-[#e5dbff] bg-[#fcfbff] p-6 shadow-[0_10px_22px_rgba(67,40,130,0.045)]"
           >
             <span
-              className={`inline-flex h-9 w-9 items-center justify-center rounded-[8px] ${iconClass}`}
+              className={`inline-flex h-10 w-10 items-center justify-center rounded-[8px] ${iconClass}`}
             >
               <AssetIcon
                 src={feature.icon}
                 alt={feature.iconAlt}
-                className="h-[22px] w-[22px]"
+                className="h-[21px] w-[21px]"
               />
             </span>
-            <h2 className="mt-5 text-[24px] font-semibold leading-tight text-[#22202a]">
+            <h2 className="mt-5 text-[23px] font-semibold leading-tight text-[#22202a]">
               {feature.title}
             </h2>
-            <p className="mt-3 text-[16px] leading-[1.35] text-[#77737f]">
+            <p className="mt-3 max-w-[280px] text-[15px] leading-[1.35] text-[#77737f]">
               {feature.description}
             </p>
           </article>

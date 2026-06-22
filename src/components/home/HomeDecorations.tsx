@@ -7,12 +7,12 @@ export default function HomeDecorations() {
     <>
       <AssetIcon
         src={blob4}
-        className="pointer-events-none absolute left-[-132px] top-[240px] h-[273px] w-[261px]"
+        className="pointer-events-none absolute left-[-104px] top-[246px] h-[276px] w-[264px]"
       />
 
       <AssetIcon
         src={blob1}
-        className="pointer-events-none absolute right-[-128px] top-[340px] h-[266px] w-[266px]"
+        className="pointer-events-none absolute right-[-80px] top-[56px] h-[255px] w-[255px]"
       />
     </>
   );
