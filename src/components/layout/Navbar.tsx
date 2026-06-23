@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IconPlus } from "@tabler/icons-react";
 import AssetIcon from "../shared/AssetIcon";
 import arrowDownIcon from "../../public/Icon-assets/arrow-down.svg";
 import arrowLeftIcon from "../../public/Icon-assets/arrow-left.svg";
@@ -7,11 +8,12 @@ import logo from "../../public/Taply assets/main logo.svg";
 import lovely from "../../public/Icon-assets/lovely.svg";
 
 type NavbarProps = {
-  variant?: "home" | "workspace";
+  variant?: "home" | "workspace" | "project";
 };
 
 export default function Navbar({ variant = "home" }: NavbarProps) {
   const isWorkspace = variant === "workspace";
+  const isProject = variant === "project";
 
   return (
     <header className="relative z-10 border-b border-[#e9e5f0] bg-white/90">
@@ -47,8 +49,17 @@ export default function Navbar({ variant = "home" }: NavbarProps) {
             className="inline-flex h-[28px] items-center gap-2 rounded-[8px] bg-primary px-4 text-[12px] font-semibold !text-white shadow-[0_10px_24px_rgba(112,33,248,0.24)] transition hover:bg-primary-strong"
             style={{ color: "#ffffff" }}
           >
-            <AssetIcon src={arrowLeftIcon} className="h-[12px] w-[12px]" />
+            <AssetIcon src={arrowLeftIcon} className="h-[12px] w-[12px] text-white" />
             Back
+          </Link>
+        ) : isProject ? (
+          <Link
+            href="/review/new"
+            className="inline-flex h-[28px] items-center gap-2 rounded-[8px] bg-primary px-4 text-[12px] font-semibold !text-white shadow-[0_10px_24px_rgba(112,33,248,0.24)] transition hover:bg-primary-strong"
+            style={{ color: "#ffffff" }}
+          >
+            <IconPlus size={12} stroke={2.4} />
+            <span className="text-white">New Project</span>
           </Link>
         ) : (
           <a
@@ -56,7 +67,7 @@ export default function Navbar({ variant = "home" }: NavbarProps) {
             className="inline-flex h-[28px] items-center gap-2 rounded-[8px] bg-primary px-4 text-[12px] font-semibold !text-white shadow-[0_10px_24px_rgba(112,33,248,0.24)] transition hover:bg-primary-strong"
             style={{ color: "#ffffff" }}
           >
-            Start
+            <span className="text-white">Start</span>
             <AssetIcon src={arrowRight} className="h-[12px] w-[12px]" />
           </a>
         )}
