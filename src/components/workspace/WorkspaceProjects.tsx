@@ -18,7 +18,7 @@ export default function WorkspaceProjects({ onNewProjectClick }: WorkspaceProjec
           className="inline-flex h-[48px] items-center gap-2 rounded-[11px] bg-[linear-gradient(180deg,#7a2bf8_0%,#6d20f5_100%)] px-[22px] text-[14px] font-semibold text-white shadow-[0_14px_24px_rgba(112,33,248,0.22)]"
         >
           <IconPlus size={16} stroke={2} />
-          <span>New Project</span>
+          <span className="text-white">New Project</span>
         </button>
       </div>
 
@@ -36,7 +36,7 @@ export default function WorkspaceProjects({ onNewProjectClick }: WorkspaceProjec
             onClick={onNewProjectClick}
             className="mt-[27px] inline-flex h-[44px] items-center rounded-[11px] bg-[linear-gradient(180deg,#7d2df8_0%,#6c20f4_100%)] px-[22px] text-[14px] font-semibold text-white"
           >
-            New Project
+            <span className="text-white">New Project</span>
           </button>
         </div>
       </div>

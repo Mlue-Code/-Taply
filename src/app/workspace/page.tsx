@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import SiteFooter from "@/components/home/SiteFooter";
 import CreateProjectModal from "@/components/workspace/CreateProjectModal";
@@ -29,18 +30,25 @@ const stats = [
 ];
 
 export default function WorkspacePage() {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [projectName, setProjectName] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsModalOpen(false);
-      }
-    };
+  const handleCreateProject = () => {
+    const name = projectName.trim() || "Untitled Project";
+    const slug = name
+      .toLowerCase()
+      .replace(/['"]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+    const projectSlug = slug || "untitled-project";
+    const url = `/review/${projectSlug}?name=${encodeURIComponent(name)}&description=${encodeURIComponent(projectDescription.trim())}`;
+
+    setIsModalOpen(false);
+    router.push(url);
+  };
 
   return (
     <main className="min-h-screen bg-[#fbfbff] text-[#1c1340]">
@@ -53,7 +61,15 @@ export default function WorkspacePage() {
 
       <SiteFooter variant="workspace" />
 
-      <CreateProjectModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <CreateProjectModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        projectName={projectName}
+        projectDescription={projectDescription}
+        onProjectNameChange={setProjectName}
+        onProjectDescriptionChange={setProjectDescription}
+        onCreate={handleCreateProject}
+      />
     </main>
   );
 }
