@@ -16,7 +16,9 @@ type ProjectSectionProps = {
   buttonClassName?: string;
   showButton?: boolean;
   actionOnClick?: () => void;
+  actionDisabled?: boolean;
   buttonOnClick?: () => void;
+  buttonDisabled?: boolean;
   className?: string;
 };
 
@@ -34,7 +36,9 @@ export default function ProjectSection({
   buttonClassName,
   showButton = true,
   actionOnClick,
+  actionDisabled = false,
   buttonOnClick,
+  buttonDisabled = false,
   className = "mt-[72px]",
 }: ProjectSectionProps) {
   return (
@@ -42,7 +46,12 @@ export default function ProjectSection({
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-[20px] font-medium text-[#0f0f16]">{title}</h2>
 
-        {actionOnClick ? (
+        {actionDisabled ? (
+          <button type="button" disabled className={actionClassName}>
+            {actionLeadingIcon}
+            <span className="text-white">{actionLabel}</span>
+          </button>
+        ) : actionOnClick ? (
           <button type="button" onClick={actionOnClick} className={actionClassName}>
             {actionLeadingIcon}
             <span className="text-white">{actionLabel}</span>
@@ -63,7 +72,12 @@ export default function ProjectSection({
           <h3 className="m-0 text-[16px] font-medium text-[#121212]">{emptyTitle}</h3>
           <p className="mt-2.5 max-w-[290px] text-[11px] text-[#818181]">{description}</p>
           {showButton ? (
-            buttonOnClick ? (
+            buttonDisabled ? (
+              <button type="button" disabled className={buttonClassName}>
+                {buttonLeadingIcon}
+                <span className="text-white">{buttonLabel}</span>
+              </button>
+            ) : buttonOnClick ? (
               <button type="button" onClick={buttonOnClick} className={buttonClassName}>
                 {buttonLeadingIcon}
                 <span className="text-white">{buttonLabel}</span>

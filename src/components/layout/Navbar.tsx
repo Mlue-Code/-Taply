@@ -46,7 +46,7 @@ export default function Navbar({ variant = "home" }: NavbarProps) {
         {isWorkspace ? (
           <Link
             href="/"
-            className="inline-flex h-[28px] items-center gap-2 rounded-[8px] bg-primary px-4 text-[12px] font-semibold !text-white shadow-[0_10px_24px_rgba(112,33,248,0.24)] transition hover:bg-primary-strong"
+            className="inline-flex h-[28px] items-center gap-2 rounded-[8px] bg-primary px-4 text-[12px] font-semibold !text-white transition hover:bg-primary-strong"
             style={{ color: "#ffffff" }}
           >
             <AssetIcon src={arrowLeftIcon} className="h-[12px] w-[12px] text-white" />
@@ -55,7 +55,7 @@ export default function Navbar({ variant = "home" }: NavbarProps) {
         ) : isProject ? (
           <Link
             href="/review/new"
-            className="inline-flex h-[28px] items-center gap-2 rounded-[8px] bg-primary px-4 text-[12px] font-semibold !text-white shadow-[0_10px_24px_rgba(112,33,248,0.24)] transition hover:bg-primary-strong"
+            className="inline-flex h-[28px] items-center gap-2 rounded-[8px] bg-primary px-4 text-[12px] font-semibold !text-white transition hover:bg-primary-strong"
             style={{ color: "#ffffff" }}
           >
             <IconPlus size={12} stroke={2.4} />
@@ -64,7 +64,7 @@ export default function Navbar({ variant = "home" }: NavbarProps) {
         ) : (
           <a
             href="/workspace"
-            className="inline-flex h-[28px] items-center gap-2 rounded-[8px] bg-primary px-4 text-[12px] font-semibold !text-white shadow-[0_10px_24px_rgba(112,33,248,0.24)] transition hover:bg-primary-strong"
+            className="inline-flex h-[28px] items-center gap-2 rounded-[8px] bg-primary px-4 text-[12px] font-semibold !text-white transition hover:bg-primary-strong"
             style={{ color: "#ffffff" }}
           >
             <span className="text-white">Start</span>

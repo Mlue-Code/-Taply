@@ -15,7 +15,7 @@ export default function WorkspaceProjects({ onNewProjectClick }: WorkspaceProjec
         <button
           type="button"
           onClick={onNewProjectClick}
-          className="inline-flex h-[48px] items-center gap-2 rounded-[11px] bg-[linear-gradient(180deg,#7a2bf8_0%,#6d20f5_100%)] px-[22px] text-[14px] font-semibold text-white shadow-[0_14px_24px_rgba(112,33,248,0.22)]"
+          className="inline-flex h-[48px] items-center gap-2 rounded-[11px] bg-[linear-gradient(180deg,#7a2bf8_0%,#6d20f5_100%)] px-[22px] text-[14px] font-semibold text-white"
         >
           <IconPlus size={16} stroke={2} />
           <span className="text-white">New Project</span>

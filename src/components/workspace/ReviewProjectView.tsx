@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from "react";
-import { IconPlus } from "@tabler/icons-react";
+import { useEffect, useRef, useState } from "react";
+import { IconPlus, IconTrash } from "@tabler/icons-react";
 import Navbar from "@/components/layout/Navbar";
 import AssetIcon from "@/components/shared/AssetIcon";
 import ProjectHeaderBar from "@/components/workspace/ProjectHeaderBar";
@@ -20,30 +20,134 @@ type ReviewProjectViewProps = {
   projectDescription: string;
 };
 
-const stats = [
-  {
-    label: "Designs",
-    value: "0",
-    icon: imageIcon,
-  },
-  {
-    label: "Review Sessions",
-    value: "0",
-    icon: clipboardTextIcon,
-    iconClassName: "opacity-50 grayscale",
-  },
-  {
-    label: "Unresolved Feedback",
-    value: "0",
-    icon: messageRemoveIcon,
-  },
-];
+type DesignItem = {
+  id: string;
+  name: string;
+  uploadedAt: string;
+  previewUrl: string;
+};
+
+function formatUploadedAt(date: Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "numeric",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
+function stripExtension(fileName: string) {
+  return fileName.replace(/\.[^.]+$/, "");
+}
+
+function makeId() {
+  return globalThis.crypto?.randomUUID?.() ?? `design-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function DesignCard({
+  design,
+  onRemove,
+}: {
+  design: DesignItem;
+  onRemove: () => void;
+}) {
+  return (
+    <article className="flex h-[304px] w-[392px] flex-col overflow-hidden rounded-[13px] border border-[#ece6f7] bg-white shadow-[0_16px_34px_rgba(26,15,54,0.12)]">
+      <div className="relative h-[232px] overflow-hidden bg-[#f7f2ff]">
+        {/* We render uploaded previews with a plain img because the source is a runtime object URL. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={design.previewUrl} alt={design.name} className="h-full w-full object-cover" />
+      </div>
+
+      <div className="flex items-end justify-between gap-4 px-4 py-3">
+        <div className="min-w-0">
+          <h3 className="truncate text-[16px] font-semibold text-[#121212]">{design.name}</h3>
+          <p className="mt-1 text-[12px] text-[#8a8494]">Uploaded {design.uploadedAt}</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onRemove}
+          className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[#ff3a32] transition hover:opacity-80"
+        >
+          <IconTrash size={12} stroke={2} />
+          <span>Remove</span>
+        </button>
+      </div>
+    </article>
+  );
+}
 
 export default function ReviewProjectView({
   projectName,
   projectDescription,
 }: ReviewProjectViewProps) {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [uploadModalKey, setUploadModalKey] = useState(0);
+  const [designs, setDesigns] = useState<DesignItem[]>([]);
+  const previewUrlsRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    return () => {
+      previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      previewUrlsRef.current = [];
+    };
+  }, []);
+
+  const stats = [
+    {
+      label: "Designs",
+      value: String(designs.length),
+      icon: imageIcon,
+    },
+    {
+      label: "Review Sessions",
+      value: "0",
+      icon: clipboardTextIcon,
+      iconClassName: "opacity-50 grayscale",
+    },
+    {
+      label: "Unresolved Feedback",
+      value: "0",
+      icon: messageRemoveIcon,
+    },
+  ];
+
+  const handleUploadDesign = async ({ name, file }: { name: string; file: File }) => {
+    const previewUrl = URL.createObjectURL(file);
+    previewUrlsRef.current.push(previewUrl);
+
+    setDesigns((current) => [
+      {
+        id: makeId(),
+        name: name.trim() || stripExtension(file.name),
+        uploadedAt: formatUploadedAt(new Date()),
+        previewUrl,
+      },
+      ...current,
+    ]);
+  };
+
+  const handleRemoveDesign = (id: string) => {
+    setDesigns((current) => {
+      const target = current.find((design) => design.id === id);
+      if (target) {
+        URL.revokeObjectURL(target.previewUrl);
+        previewUrlsRef.current = previewUrlsRef.current.filter((url) => url !== target.previewUrl);
+      }
+
+      return current.filter((design) => design.id !== id);
+    });
+  };
+
+  const openUploadModal = () => {
+    setUploadModalKey((current) => current + 1);
+    setIsUploadModalOpen(true);
+  };
+
+  const sessionActionClassName =
+    "inline-flex h-[48px] items-center gap-2 rounded-[11px] bg-[linear-gradient(180deg,#7a2bf8_0%,#6d20f5_100%)] px-[22px] text-[14px] font-semibold text-white transition hover:bg-[#6d20f5] disabled:cursor-not-allowed disabled:opacity-50";
+  const createSessionClassName =
+    "mt-[14px] inline-flex h-[34px] items-center gap-1.5 rounded-[8px] bg-[linear-gradient(180deg,#7a2bf8_0%,#6d20f5_100%)] px-[16px] text-[12px] font-medium leading-none text-white transition hover:bg-[#6d20f5] outline-none";
 
   return (
     <main className="min-h-screen bg-[#fbfbff] text-[#1c1340]">
@@ -53,37 +157,89 @@ export default function ReviewProjectView({
       <div className="mx-auto w-full max-w-[1110px] px-4 pt-[65px] pb-[120px] xl:px-0">
         <ProjectStats stats={stats} />
 
-        <ProjectSection
-          title="Designs"
-          actionLabel="Upload Design"
-          actionHref="/review/new"
-          actionOnClick={() => setIsUploadModalOpen(true)}
-          actionLeadingIcon={<AssetIcon src={sendIcon} className="h-[24px] w-[24px]" />}
-          icon={directSendIcon}
-          emptyTitle="No designs yet"
-          description="Upload your first design to get started"
-          buttonLabel="Drag or Upload you design here "
-          buttonOnClick={() => setIsUploadModalOpen(true)}
-          buttonLeadingIcon={<AssetIcon src={sendIcon} className="h-[24px] w-[24px]" />}
-          actionClassName="inline-flex h-[48px] items-center gap-2 rounded-[11px] bg-[linear-gradient(180deg,#7a2bf8_0%,#6d20f5_100%)] px-[22px] text-[14px] font-semibold text-white shadow-[0_14px_24px_rgba(112,33,248,0.22)]"
-          buttonClassName="mt-[27px] inline-flex h-[44px] items-center gap-2 rounded-[11px] bg-[linear-gradient(180deg,#7d2df8_0%,#6c20f4_100%)] px-[22px] text-[14px] font-semibold text-white"
-        />
+        <section className="mt-[72px]">
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-[20px] font-medium text-[#0f0f16]">Designs</h2>
+
+            {designs.length === 0 ? (
+              <button
+                type="button"
+                onClick={openUploadModal}
+                className="inline-flex h-[48px] items-center gap-2 rounded-[11px] bg-[linear-gradient(180deg,#7a2bf8_0%,#6d20f5_100%)] px-[22px] text-[14px] font-semibold text-white"
+              >
+                <AssetIcon src={sendIcon} className="h-[24px] w-[24px]" />
+                <span className="text-white">Upload Design</span>
+              </button>
+            ) : null}
+          </div>
+
+          {designs.length === 0 ? (
+            <div className="mt-[18px] rounded-[13px] border-[2px] border-dashed border-[#7c43ff]/90 bg-[linear-gradient(180deg,rgba(250,248,255,0.98),rgba(248,244,255,0.98))]">
+              <div className="flex min-h-[302px] flex-col items-center justify-center rounded-[11px] text-center">
+                <div className="mb-[10px] flex h-[58px] w-[58px] items-center justify-center rounded-[14px] text-[rgba(178,137,255,0.6)]">
+                  <AssetIcon src={directSendIcon} className="h-[60px] w-[60px]" />
+                </div>
+                <h3 className="m-0 text-[16px] font-medium text-[#121212]">No designs yet</h3>
+                <p className="mt-2.5 max-w-[290px] text-[11px] text-[#818181]">
+                  Upload your first design to get started
+                </p>
+                <button
+                  type="button"
+                  onClick={openUploadModal}
+                  className="mt-[27px] inline-flex h-[44px] items-center gap-2 rounded-[11px] bg-[linear-gradient(180deg,#7d2df8_0%,#6c20f4_100%)] px-[22px] text-[14px] font-semibold text-white"
+                >
+                  <AssetIcon src={sendIcon} className="h-[24px] w-[24px]" />
+                  <span className="text-white">Upload Design</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-[26px] grid gap-5 sm:grid-cols-2 xl:justify-start xl:[grid-template-columns:repeat(auto-fit,392px)]">
+              {designs.map((design) => (
+                <DesignCard
+                  key={design.id}
+                  design={design}
+                  onRemove={() => handleRemoveDesign(design.id)}
+                />
+              ))}
+
+              <button
+                type="button"
+                onClick={openUploadModal}
+                className="flex h-[304px] w-[392px] items-center justify-center rounded-[13px] border-[2px] border-dashed border-[#b892ff] bg-[#f7f2ff] transition hover:border-[#8e57ff] hover:bg-[#f4edff]"
+                aria-label="Add design"
+              >
+                <span className="flex h-[64px] w-[64px] items-center justify-center rounded-full bg-[#6c25f5] text-white shadow-[0_14px_24px_rgba(108,37,245,0.2)]">
+                  <IconPlus size={34} stroke={2.2} />
+                </span>
+              </button>
+            </div>
+          )}
+        </section>
 
         <ProjectSection
           className="mt-[72px]"
           title="Review Sessions"
           actionLabel="New Session"
           actionHref="/review/new"
-          actionLeadingIcon={<IconPlus size={19} stroke={2} className="text-white" />}
+          actionLeadingIcon={<IconPlus size={16} stroke={2.2} className="text-white" />}
           icon={reviewSessionIcon}
           emptyTitle="No review sessions"
           description="Upload designs first to create a review session"
-          actionClassName="inline-flex h-[48px] items-center gap-2 rounded-[11px] bg-[linear-gradient(180deg,#b694ff_0%,#bb9bff_100%)] px-[22px] text-[14px] font-semibold text-white shadow-[0_14px_24px_rgba(178,140,255,0.18)]"
-          showButton={false}
+          actionClassName={sessionActionClassName}
+          actionDisabled={designs.length === 0}
+          showButton={designs.length > 0}
+          buttonLabel="Create Session"
+          buttonClassName={createSessionClassName}
         />
       </div>
 
-      <UploadDesignModal open={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} />
+      <UploadDesignModal
+        key={uploadModalKey}
+        open={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onUpload={handleUploadDesign}
+      />
     </main>
   );
 }
