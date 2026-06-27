@@ -25,10 +25,12 @@ jest.mock("@/lib/firebase-admin", () => {
 });
 
 import handler from "@/pages/api/feedback";
+import { resetRateLimitStore } from "@/lib/rate-limit";
 
 describe("POST /api/feedback", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    resetRateLimitStore(); // ← Reset rate limiter before each test
   });
   // HTTP Method Validation
   describe("HTTP Method Validation", () => {

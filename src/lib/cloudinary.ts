@@ -6,7 +6,7 @@ if (
   !process.env.CLOUDINARY_API_SECRET
 ) {
   throw new Error(
-    "❌ Cloudinary: Missing required environment variables.\n" +
+    "Cloudinary: Missing required environment variables.\n" +
       "Please verify that CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET are properly configured in .env.local.",
   );
 }

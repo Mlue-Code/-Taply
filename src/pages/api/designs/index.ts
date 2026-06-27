@@ -5,6 +5,7 @@ import { uploadImage } from "@/lib/cloudinary";
 import { verifyAuth } from "@/lib/auth";
 import { parseFormFile } from "@/lib/parse-form";
 import { sendError, allowMethod } from "@/utils/api-helpers";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { UploadDesignResponse, ApiErrorResponse } from "@/types/taply";
 
 export const config = {
@@ -13,11 +14,31 @@ export const config = {
   },
 };
 
+// Rate limit: 20 uploads per hour per IP
+const UPLOAD_RATE_LIMIT = {
+  maxRequests: 20,
+  windowMs: 60 * 60 * 1000,
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<UploadDesignResponse | ApiErrorResponse>,
 ) {
   if (!allowMethod(req.method, "POST", res)) return;
+
+  // ─── Rate Limiting ───
+  const ip = getClientIp(req);
+  const rateLimitResult = checkRateLimit(ip, UPLOAD_RATE_LIMIT);
+
+  if (!rateLimitResult.allowed) {
+    res.setHeader("Retry-After", "3600");
+    return sendError(
+      res,
+      429,
+      "INTERNAL_ERROR",
+      "Too many uploads. Please wait before uploading again.",
+    );
+  }
 
   try {
     const auth = await verifyAuth(req);
