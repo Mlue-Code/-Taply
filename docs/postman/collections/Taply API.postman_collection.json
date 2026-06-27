@@ -1,0 +1,474 @@
+{
+  "info": {
+    "_postman_id": "ae759081-4bac-46c0-af4d-d60f52f9709f",
+    "name": "Taply API",
+    "description": "API endpoints for Taply MVP - Design feedback platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Designs",
+      "item": [
+        {
+          "name": "Upload Design",
+          "id": "8098af4f-6701-43e5-8d31-c92cb7d812ec",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebaseToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "description": "Image file (max 10MB) - JPG, PNG, GIF, WEBP",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/designs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "designs"
+              ]
+            },
+            "description": "Upload a new design image. Requires Firebase Authentication. Returns the design ID and a shareable ID for public access."
+          },
+          "response": [
+            {
+              "id": "7724c390-1baf-4d48-94df-0015b445f913",
+              "name": "Success - 201 Created",
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": \"abc123xyz\",\n  \"shareableId\": \"ckpqr5w8x000abc\",\n  \"imageUrl\": \"https://res.cloudinary.com/taply/image/upload/v1234/design.jpg\",\n  \"createdAt\": \"2025-01-15T10:30:00.000Z\"\n}"
+            },
+            {
+              "id": "719053f1-2624-42fa-b74c-b57cb1f54a64",
+              "name": "Error - 401 Missing Auth",
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"UNAUTHORIZED\",\n  \"message\": \"Authorization header missing\"\n}"
+            },
+            {
+              "id": "0121fc44-6fb7-493e-a089-61a58c668782",
+              "name": "Error - 401 Invalid Token",
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"UNAUTHORIZED\",\n  \"message\": \"Invalid or expired token\"\n}"
+            },
+            {
+              "id": "a8ab8448-86c7-42d2-90db-e45974c31c7d",
+              "name": "Error - 400 No File",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"VALIDATION_ERROR\",\n  \"message\": \"No image file provided. Use field name \\\"image\\\"\"\n}"
+            },
+            {
+              "id": "61f57e46-59a1-40b2-bdf1-a3b9a742a91b",
+              "name": "Error - 400 Invalid File Type",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"VALIDATION_ERROR\",\n  \"message\": \"Only image files are allowed\"\n}"
+            },
+            {
+              "id": "0523653b-22b2-4aa8-8ac8-5f8daa955180",
+              "name": "Error - 500 Server Error",
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"INTERNAL_ERROR\",\n  \"message\": \"Failed to upload image\"\n}"
+            }
+          ]
+        }
+      ],
+      "id": "c7b6bed0-0d6d-41be-9b21-bfcd61d57f2f",
+      "description": "Endpoints for managing design uploads"
+    },
+    {
+      "name": "Feedback",
+      "item": [
+        {
+          "name": "Create Feedback - Valid",
+          "id": "5c947976-19b6-4659-a6c1-46a764b31812",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"designId\": \"{{designId}}\",\n  \"comment\": \"This looks great! Maybe try a brighter color here.\",\n  \"x\": 0.45,\n  \"y\": 0.78\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/feedback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "feedback"
+              ]
+            },
+            "description": "Submit feedback on a design at specific coordinates. Public endpoint - no authentication required. Coordinates must be normalized to 0-1 range."
+          },
+          "response": [
+            {
+              "id": "19af8aec-0dc4-4014-a657-b73f611886e6",
+              "name": "Success - 201 Created",
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": \"ckpqr5w8x000abc\",\n  \"comment\": \"This looks great! Maybe try a brighter color here.\",\n  \"x\": 0.45,\n  \"y\": 0.78,\n  \"createdAt\": \"2025-01-15T12:30:00.000Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Feedback - Empty Comment",
+          "id": "6056765b-a6a0-4c71-b887-dede92af047c",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"designId\": \"{{designId}}\",\n  \"comment\": \"\",\n  \"x\": 0.5,\n  \"y\": 0.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/feedback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "feedback"
+              ]
+            },
+            "description": "Test validation: empty comment should return 400 VALIDATION_ERROR"
+          },
+          "response": [
+            {
+              "id": "212077d0-30f6-49ab-abd4-da9d958881fe",
+              "name": "Error - 400 Empty Comment",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"VALIDATION_ERROR\",\n  \"message\": \"comment: comment cannot be empty\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Feedback - Too Long Comment",
+          "id": "c54de052-f595-44d0-a08b-df62bb8f7ec1",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"designId\": \"{{designId}}\",\n  \"comment\": \"This is a very long comment that exceeds the maximum allowed length of 500 characters. We need to ensure that the validation properly rejects comments that are too long. This text is intentionally long to trigger the validation error. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\",\n  \"x\": 0.5,\n  \"y\": 0.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/feedback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "feedback"
+              ]
+            },
+            "description": "Test validation: comment longer than 500 characters should return 400"
+          },
+          "response": [
+            {
+              "id": "f2b2b4ef-1d7c-4760-9cfa-8d29e7dc4637",
+              "name": "Error - 400 Too Long",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"VALIDATION_ERROR\",\n  \"message\": \"comment: comment must be 500 characters or less\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Feedback - Invalid Coordinates",
+          "id": "7d6522ab-9017-4dca-a317-c99f5116f247",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"designId\": \"{{designId}}\",\n  \"comment\": \"Test\",\n  \"x\": 2,\n  \"y\": -1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/feedback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "feedback"
+              ]
+            },
+            "description": "Test validation: coordinates outside 0-1 range should be rejected"
+          },
+          "response": [
+            {
+              "id": "55236b80-e7ac-4767-af25-6883501511c0",
+              "name": "Error - 400 Invalid Coordinates",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"VALIDATION_ERROR\",\n  \"message\": \"x: x must be between 0 and 1, y: y must be between 0 and 1\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Feedback - Missing Fields",
+          "id": "fe89409f-4d7f-47d4-b916-ab86ea74cfc6",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"Test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/feedback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "feedback"
+              ]
+            },
+            "description": "Test validation: missing required fields should be rejected"
+          },
+          "response": [
+            {
+              "id": "9004aa88-83dc-4a09-9a7a-7903531a77fa",
+              "name": "Error - 400 Missing Fields",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"VALIDATION_ERROR\",\n  \"message\": \"designId: designId is required, x: x coordinate is required, y: y coordinate is required\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Feedback - Design Not Found",
+          "id": "f78242f8-8def-4efa-82b3-8710ded5afdd",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"designId\": \"non-existent-id\",\n  \"comment\": \"Test\",\n  \"x\": 0.5,\n  \"y\": 0.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/feedback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "feedback"
+              ]
+            },
+            "description": "Test: providing a designId that doesn't exist should return 404"
+          },
+          "response": [
+            {
+              "id": "2500e16d-b99e-42ea-ae23-a4962adbeaea",
+              "name": "Error - 404 Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"NOT_FOUND\",\n  \"message\": \"Design with id \\\"non-existent-id\\\" not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Feedback - Boundary Values",
+          "id": "f713d8e5-2d15-44b3-b843-3db1d078c03b",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"designId\": \"{{designId}}\",\n  \"comment\": \"Top-left corner feedback\",\n  \"x\": 0,\n  \"y\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/feedback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "feedback"
+              ]
+            },
+            "description": "Test: boundary values (0 and 1) should be accepted"
+          },
+          "response": [
+            {
+              "id": "12344121-330a-48c6-9560-c7d14ea4534a",
+              "name": "Success - 201 with boundary values",
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"id\": \"newFeedbackId\",\n  \"comment\": \"Top-left corner feedback\",\n  \"x\": 0,\n  \"y\": 0,\n  \"createdAt\": \"2025-01-15T12:30:00.000Z\"\n}"
+            }
+          ]
+        }
+      ],
+      "id": "744b34f1-b965-4088-ade5-aba7d7e878e5",
+      "description": "Endpoints for managing design feedback (public access)"
+    }
+  ],
+  "variable": [
+    {
+      "id": "9af0ec48-8757-4c8d-9119-cdb4858aae6d",
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "description": "API base URL"
+    },
+    {
+      "id": "ed59e5ad-cfa7-47a7-89f1-594fe9c6e25b",
+      "key": "firebaseToken",
+      "value": "PASTE_YOUR_FIREBASE_TOKEN_HERE",
+      "description": "Firebase ID token for authenticated endpoints"
+    },
+    {
+      "id": "7c48be21-08d0-4899-8a48-4819cbc126ea",
+      "key": "designId",
+      "value": "PASTE_REAL_DESIGN_ID_HERE",
+      "description": "Real design ID for feedback testing"
+    }
+  ]
+}
