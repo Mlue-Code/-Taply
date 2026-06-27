@@ -15,8 +15,8 @@ if (getApps().length === 0) {
     !privateKey
   ) {
     throw new Error(
-      "❌ Firebase Admin SDK: متغیرهای محیطی پیدا نشد!\n" +
-        "مطمئن شو .env.local درست پر شده.",
+      "Firebase Admin SDK: Environment variables not found!\n" +
+        "Make sure your .env.local file is properly configured.",
     );
   }
 
