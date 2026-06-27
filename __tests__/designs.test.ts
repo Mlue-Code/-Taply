@@ -34,10 +34,12 @@ jest.mock("@/lib/parse-form", () => ({
 import handler from "@/pages/api/designs";
 import { adminAuth } from "@/lib/firebase-admin";
 import { parseFormFile } from "@/lib/parse-form";
+import { resetRateLimitStore } from "@/lib/rate-limit";
 
 describe("POST /api/designs", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    resetRateLimitStore(); // ← Reset rate limiter before each test
   });
 
   // ─── HTTP Method Tests ───

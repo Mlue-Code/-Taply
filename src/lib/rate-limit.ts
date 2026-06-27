@@ -5,21 +5,25 @@ interface RateLimitEntry {
 
 const store = new Map<string, RateLimitEntry>();
 
-setInterval(
-  () => {
-    const now = Date.now();
-    for (const [key, value] of store.entries()) {
-      if (now > value.resetTime) {
-        store.delete(key);
+// Clean up old entries every 5 minutes
+// Only run cleanup in production (not during tests)
+if (process.env.NODE_ENV !== "test") {
+  setInterval(
+    () => {
+      const now = Date.now();
+      for (const [key, value] of store.entries()) {
+        if (now > value.resetTime) {
+          store.delete(key);
+        }
       }
-    }
-  },
-  5 * 60 * 1000,
-);
+    },
+    5 * 60 * 1000,
+  );
+}
 
 export interface RateLimitOptions {
-  maxRequests: number; // Max requests allowed
-  windowMs: number; // Time window in milliseconds
+  maxRequests: number;
+  windowMs: number;
 }
 
 export interface RateLimitResult {
@@ -30,10 +34,6 @@ export interface RateLimitResult {
 
 /**
  * Check if an IP address has exceeded the rate limit.
- *
- * @param ip - The client IP address
- * @param options - Rate limit configuration
- * @returns Whether the request is allowed
  */
 export function checkRateLimit(
   ip: string,
@@ -44,7 +44,6 @@ export function checkRateLimit(
 
   const entry = store.get(key);
 
-  // First request or window expired
   if (!entry || now > entry.resetTime) {
     store.set(key, {
       count: 1,
@@ -58,7 +57,6 @@ export function checkRateLimit(
     };
   }
 
-  // Window still active
   if (entry.count >= options.maxRequests) {
     return {
       allowed: false,
@@ -67,7 +65,6 @@ export function checkRateLimit(
     };
   }
 
-  // Increment counter
   entry.count += 1;
   store.set(key, entry);
 
@@ -85,9 +82,15 @@ export function getClientIp(req: import("next").NextApiRequest): string {
   const forwarded = req.headers["x-forwarded-for"];
 
   if (typeof forwarded === "string") {
-    // x-forwarded-for can be "ip1, ip2, ip3" - take first
     return forwarded.split(",")[0].trim();
   }
 
   return req.socket?.remoteAddress || "unknown";
+}
+
+/**
+ * Reset all rate limit entries (for testing only).
+ */
+export function resetRateLimitStore(): void {
+  store.clear();
 }
