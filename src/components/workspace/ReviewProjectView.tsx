@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import Navbar from "@/components/layout/Navbar";
 import AssetIcon from "@/components/shared/AssetIcon";
 import ProjectHeaderBar from "@/components/workspace/ProjectHeaderBar";
 import ProjectSection from "@/components/workspace/ProjectSection";
 import ProjectStats from "@/components/workspace/ProjectStats";
+import CreateReviewSessionModal from "@/components/workspace/CreateReviewSessionModal";
 import UploadDesignModal from "@/components/workspace/UploadDesignModal";
 import imageIcon from "../../public/Icon-assets/image.svg";
 import clipboardTextIcon from "../../public/Icon-assets/clipboard-text.svg";
@@ -20,7 +22,7 @@ type ReviewProjectViewProps = {
   projectDescription: string;
 };
 
-type DesignItem = {
+export type DesignItem = {
   id: string;
   name: string;
   uploadedAt: string;
@@ -58,7 +60,7 @@ function DesignCard({
         <img src={design.previewUrl} alt={design.name} className="h-full w-full object-cover" />
       </div>
 
-      <div className="flex items-end justify-between gap-4 px-4 py-3">
+      <div className="flex items-center justify-between gap-4 px-4 py-4">
         <div className="min-w-0">
           <h3 className="truncate text-[16px] font-semibold text-[#121212]">{design.name}</h3>
           <p className="mt-1 text-[12px] text-[#8a8494]">Uploaded {design.uploadedAt}</p>
@@ -67,10 +69,12 @@ function DesignCard({
         <button
           type="button"
           onClick={onRemove}
-          className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[#ff3a32] transition hover:opacity-80"
+          className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap text-[#ff3a32] transition hover:opacity-80"
         >
           <IconTrash size={12} stroke={2} />
-          <span>Remove</span>
+          <span style={{ fontSize: "9px", lineHeight: "1", fontWeight: 400, letterSpacing: "-0.01em" }}>
+            Remove
+          </span>
         </button>
       </div>
     </article>
@@ -82,9 +86,13 @@ export default function ReviewProjectView({
   projectDescription,
 }: ReviewProjectViewProps) {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [uploadModalKey, setUploadModalKey] = useState(0);
+  const [sessionName, setSessionName] = useState("");
+  const [selectedDesignIds, setSelectedDesignIds] = useState<string[]>([]);
   const [designs, setDesigns] = useState<DesignItem[]>([]);
   const previewUrlsRef = useRef<string[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     return () => {
@@ -142,6 +150,44 @@ export default function ReviewProjectView({
   const openUploadModal = () => {
     setUploadModalKey((current) => current + 1);
     setIsUploadModalOpen(true);
+  };
+
+  const openSessionModal = () => {
+    if (designs.length === 0) {
+      return;
+    }
+
+    setSessionName("");
+    setSelectedDesignIds([designs[0].id]);
+    setIsSessionModalOpen(true);
+  };
+
+  const handleCreateSession = ({
+    sessionName: nextSessionName,
+    selectedDesignIds: nextSelectedDesignIds,
+  }: {
+    sessionName: string;
+    selectedDesignIds: string[];
+  }) => {
+    const shareableId = makeId();
+    const selectedDesigns = designs.filter((design) => nextSelectedDesignIds.includes(design.id));
+    const payload = {
+      shareableId,
+      sessionName: nextSessionName.trim() || "Client Review - round 1",
+      projectName,
+      projectDescription,
+      selectedDesignIds: nextSelectedDesignIds,
+      designs: selectedDesigns,
+    };
+
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem(`taply-review-session:${shareableId}`, JSON.stringify(payload));
+    }
+
+    setIsSessionModalOpen(false);
+    router.push(
+      `/review/${shareableId}?view=session&name=${encodeURIComponent(payload.projectName)}&description=${encodeURIComponent(payload.projectDescription)}`,
+    );
   };
 
   const sessionActionClassName =
@@ -209,7 +255,7 @@ export default function ReviewProjectView({
                 className="flex h-[304px] w-[392px] items-center justify-center rounded-[13px] border-[2px] border-dashed border-[#b892ff] bg-[#f7f2ff] transition hover:border-[#8e57ff] hover:bg-[#f4edff]"
                 aria-label="Add design"
               >
-                <span className="flex h-[64px] w-[64px] items-center justify-center rounded-full bg-[#6c25f5] text-white shadow-[0_14px_24px_rgba(108,37,245,0.2)]">
+                <span className="flex h-[64px] w-[64px] items-center justify-center rounded-full bg-[#6c25f5] text-white">
                   <IconPlus size={34} stroke={2.2} />
                 </span>
               </button>
@@ -231,8 +277,21 @@ export default function ReviewProjectView({
           showButton={designs.length > 0}
           buttonLabel="Create Session"
           buttonClassName={createSessionClassName}
+          actionOnClick={openSessionModal}
+          buttonOnClick={openSessionModal}
         />
       </div>
+
+      <CreateReviewSessionModal
+        open={isSessionModalOpen}
+        onClose={() => setIsSessionModalOpen(false)}
+        designs={designs}
+        sessionName={sessionName}
+        selectedDesignIds={selectedDesignIds}
+        onSessionNameChange={setSessionName}
+        onSelectedDesignIdsChange={setSelectedDesignIds}
+        onCreate={handleCreateSession}
+      />
 
       <UploadDesignModal
         key={uploadModalKey}
