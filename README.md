@@ -249,19 +249,17 @@ Used for
 
 # UI Components
 
-Material UI is used throughout the application.
+Tailwind CSS is used throughout the application for styling.
 
 Examples include
 
-- Button
-- Modal
-- Dialog
-- Snackbar
-- Alert
-- Avatar
-- Chip
-- Skeleton
-- Circular Progress
+- Custom Button components
+- Modal & Dialog
+- Form inputs
+- Loading skeletons
+- Alert notifications
+- Responsive layouts
+- Icon components (Tabler Icons)
 
 ---
 
