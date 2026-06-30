@@ -1,108 +1,179 @@
-# Taply Frontend (MVP)
+# Taply
 
-A modern design feedback platform built with Next.js that enables designers to upload designs and collect visual feedback from clients through shareable review links.
+A modern design feedback platform built with **Next.js** that enables designers to upload designs, share them with clients, and collect contextual visual feedback through interactive comment markers.
+
+![Status](https://img.shields.io/badge/status-MVP-blue)
+![Next.js](https://img.shields.io/badge/Next.js-15-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
 
-## 🚀 Overview
+# Overview
 
-Taply is a lightweight design review tool that allows:
+Taply streamlines the design review process by allowing designers to upload images, generate shareable review links, and receive visual feedback directly on the design canvas.
 
-* Designers to upload design assets
-* Generate public shareable review links
-* Clients to leave feedback directly on specific areas of a design
-* Visual feedback markers displayed on the design canvas
-
-This MVP focuses on the core workflow:
+### MVP Workflow
 
 ```text
-Upload Design → Generate Share Link → Leave Feedback → View Feedback Pins
+Upload Design
+      │
+      ▼
+Generate Share Link
+      │
+      ▼
+Client Opens Review Page
+      │
+      ▼
+Click Anywhere on Design
+      │
+      ▼
+Leave Feedback
+      │
+      ▼
+Designer Views Feedback Pins
 ```
 
 ---
 
-## 🛠 Tech Stack
+# Features
 
-| Technology           | Purpose                 |
-| -------------------- | ----------------------- |
-| Next.js (App Router) | Application Framework   |
-| TypeScript           | Type Safety             |
-| Material UI (MUI)    | UI Components           |
-| SWR                  | Data Fetching & Caching |
-| Zustand              | Global UI State         |
-| React Hook Form      | Form Management         |
-| Zod                  | Form Validation         |
-| Firebase Auth        | Authentication          |
-| Vercel               | Deployment              |
+## Design Upload
 
+- Upload image designs
+- Secure image storage with Cloudinary
+- Upload progress indicator
+- Automatic shareable review link generation
 
----
+## Public Review Page
 
-## ✨ Features
+- Public review links
+- Dynamic routing
+- Responsive design canvas
+- Display all submitted feedback
 
-### Design Upload
+## Interactive Feedback
 
-* Upload image designs
-* Upload progress indicator
-* Integration with `POST /api/designs`
-* Automatic shareable link generation
+- Click anywhere on the design
+- Capture normalized X/Y coordinates
+- Feedback modal
+- Submit contextual comments
 
-### Public Review Page
+## Feedback Visualization
 
-* Dynamic route support
-* Design image rendering
-* Existing feedback display
+- Visual feedback pins
+- Coordinate-based positioning
+- Automatic refresh after submission
 
-### Interactive Feedback System
+## Security
 
-* Click anywhere on the design
-* Capture X/Y coordinates
-* Open feedback modal
-* Submit comments
+- Firebase Authentication
+- Firestore Security Rules
+- Cloudinary upload verification
+- API rate limiting
+- Input validation with Zod
 
-### Feedback Visualization
+## User Experience
 
-* Feedback pins displayed on canvas
-* Position preserved using coordinates
-* Automatic refresh after new feedback submission
-
-### Responsive UI
-
-* Mobile-friendly layout
-* Loading states
-* Error handling
-* Empty states
+- Responsive layout
+- Loading states
+- Empty states
+- Error handling
+- Snackbar notifications
 
 ---
 
-## 🗺 Routes
+# Tech Stack
 
-### Home Page
+| Category         | Technology              |
+| ---------------- | ----------------------- |
+| Framework        | Next.js 15 (App Router) |
+| Language         | TypeScript              |
+| UI               | tailwindcss             |
+| State Management | Zustand                 |
+| Data Fetching    | SWR                     |
+| Forms            | React Hook Form         |
+| Validation       | Zod                     |
+| Authentication   | Firebase Authentication |
+| Database         | Firebase Firestore      |
+| Image Storage    | Cloudinary              |
+| Testing          | Jest                    |
+| Deployment       | Vercel                  |
+
+---
+
+# Project Structure
+
+```text
+taply/
+│
+├── src/
+│   ├── app/
+│   │   ├── page.tsx
+│   │   ├── layout.tsx
+│   │   └── review/
+│   │       └── [shareableId]/
+│   │
+│   ├── pages/
+│   │   └── api/
+│   │       ├── designs/
+│   │       └── feedback/
+│   │
+│   ├── components/
+│   │
+│   ├── hooks/
+│   │
+│   ├── services/
+│   │
+│   ├── store/
+│   │
+│   ├── lib/
+│   │
+│   ├── types/
+│   │
+│   └── utils/
+│
+├── public/
+│
+├── tests/
+│
+├── docs/
+│
+├── .env.local
+│
+└── README.md
+```
+
+---
+
+# Routes
+
+## Home
 
 ```text
 /
 ```
 
-Purpose:
+Responsibilities
 
-* Upload a design
-* Generate a review link
+- Upload designs
+- Generate review links
 
 ---
 
-### Review Page
+## Review
 
 ```text
 /review/[shareableId]
 ```
 
-Purpose:
+Responsibilities
 
-* Display uploaded design
-* View feedback markers
-* Submit new feedback
+- Display uploaded design
+- View existing feedback
+- Submit new feedback
 
-Example:
+Example
 
 ```text
 /review/clx8af2s9
@@ -110,139 +181,116 @@ Example:
 
 ---
 
-## 🔄 API Integration
+# API Endpoints
 
-### Upload Design
+## Upload Design
 
 ```http
 POST /api/designs
 ```
 
-Request:
-
-```multipart/form-data
-file: image
-```
-
-Response:
-
-```json
-{
-  "id": "abc123",
-  "shareableId": "clx8af2s9",
-  "imageUrl": "https://..."
-}
-```
+Uploads a design and returns a unique shareable link.
 
 ---
 
-### Get Design Details
+## Get Design
 
 ```http
 GET /api/designs/[shareableId]
 ```
 
-Response:
+Returns
 
-```json
-{
-  "design": {},
-  "feedback": []
-}
-```
+- Design information
+- Feedback list
 
 ---
 
-### Create Feedback
+## Submit Feedback
 
 ```http
 POST /api/feedback
 ```
 
-Request:
-
-```json
-{
-  "designId": "abc123",
-  "comment": "Move this element slightly left.",
-  "x": 0.42,
-  "y": 0.67
-}
-```
+Creates a new feedback comment at the selected coordinates.
 
 ---
 
-## 🧩 State Management
+# State Management
 
-### Server State
+## SWR
 
-Managed using SWR.
+Used for
 
-Responsibilities:
+- Fetching designs
+- Fetching feedback
+- Cache management
+- Automatic revalidation
 
-* Design fetching
-* Feedback fetching
-* Cache management
-* Automatic revalidation
+## Zustand
 
----
+Used for global UI state
 
-### Global UI State
+Examples
 
-Managed using Zustand.
+- Feedback modal
+- Loading states
+- Selected marker
 
-Example:
+## React Hook Form + Zod
 
-```ts
-interface UIState {
-  isFeedbackModalOpen: boolean;
-}
-```
+Used for
 
----
-
-### Form State
-
-Managed using:
-
-* React Hook Form
-* Zod
-
-Forms:
-
-* Design Upload Form
-* Feedback Submission Form
+- Upload form
+- Feedback form
+- Validation
 
 ---
 
-## 🎨 Design System
+# UI Components
 
-Material UI is used as the primary component library.
+Material UI is used throughout the application.
 
-Examples:
+Examples include
 
-* Button
-* Modal
-* Alert
-* Snackbar
-* Skeleton
-* Dialog
-* Chip
-* Avatar
-
-Goals:
-
-* Consistent UI
-* Faster development
-* Accessibility support
+- Button
+- Modal
+- Dialog
+- Snackbar
+- Alert
+- Avatar
+- Chip
+- Skeleton
+- Circular Progress
 
 ---
 
-## ⚙ Environment Variables
+# Security
 
-Create a `.env.local` file:
+The backend includes multiple security layers.
+
+- Firebase Authentication
+- Firestore Security Rules
+- Cloudinary upload verification
+- Rate limiting
+- Server-side validation
+- Protected write operations
+
+---
+
+# Environment Variables
+
+Create a `.env.local` file.
 
 ```env
+# Firebase Admin
+
+FIREBASE_PROJECT_ID=
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY=
+
+# Firebase Client
+
 NEXT_PUBLIC_FIREBASE_API_KEY=
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=
@@ -250,26 +298,48 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
 
+# Cloudinary
+
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+# API
+
 NEXT_PUBLIC_API_URL=
 ```
 
 ---
 
-## 🚀 Getting Started
+# Getting Started
 
-### Install Dependencies
+## Clone Repository
+
+```bash
+git clone https://github.com/your-username/taply.git
+```
+
+```bash
+cd taply
+```
+
+---
+
+## Install Dependencies
 
 ```bash
 npm install
 ```
 
-### Run Development Server
+---
+
+## Run Development Server
 
 ```bash
 npm run dev
 ```
 
-Application:
+Open
 
 ```text
 http://localhost:3000
@@ -277,79 +347,97 @@ http://localhost:3000
 
 ---
 
-## 🧪 Development Workflow
+# Testing
 
-### Week 1
+Run all tests
 
-* Project setup
-* MUI integration
-* Design upload
-* Shareable link generation
-* Review page foundation
+```bash
+npm test
+```
 
-### Week 2
+Run tests in watch mode
 
-* Feedback modal
-* Coordinate capture
-* Feedback API integration
-* Feedback rendering
-
-### Week 3
-
-* Loading states
-* Error handling
-* Mobile responsiveness
-* Production deployment
-* Final testing
+```bash
+npm run test:watch
+```
 
 ---
 
-## 📦 Deployment
+# Deployment
 
-The application is deployed using Vercel.
+Taply is deployed using **Vercel**.
 
-Production Workflow:
+Deployment flow
 
 ```text
 GitHub
-   ↓
+   │
+   ▼
 Vercel
-   ↓
+   │
+   ▼
 Automatic Deployment
 ```
 
 ---
 
-## 🎯 MVP Scope
+# MVP Scope
 
-Included:
+Included
 
-✅ Design Upload
+- ✅ Design Upload
+- ✅ Shareable Review Links
+- ✅ Public Review Page
+- ✅ Interactive Feedback
+- ✅ Feedback Pins
+- ✅ Responsive UI
+- ✅ Firebase Authentication
+- ✅ Cloudinary Image Storage
+- ✅ Firestore Database
+- ✅ Security Hardening
 
-✅ Shareable Links
+Future Enhancements
 
-✅ Public Review Page
-
-✅ Feedback Submission
-
-✅ Feedback Visualization
-
-✅ Responsive Interface
-
-
----
-
-## 👥 Team Collaboration
-
-Frontend developers should coordinate closely with backend developers for:
-
-* API contracts
-* Shared TypeScript types
-* Error response formats
-* Deployment configuration
+- User dashboard
+- Multiple projects
+- Team collaboration
+- Rich text comments
+- Email notifications
+- Design version history
 
 ---
 
-## 📄 License
+# Team Collaboration
 
-This project is developed as the MVP version of Taply and is intended for demonstration and validation purposes.
+Frontend and backend developers collaborate through
+
+- Shared API contracts
+- Shared TypeScript types
+- Common validation schemas
+- Pull requests and code reviews
+- GitHub Issues and Projects
+
+---
+
+# License
+
+This project is developed as the MVP version of Taply for educational and demonstration purposes.
+
+---
+
+# Acknowledgements
+
+Special thanks to the teams behind
+
+- Next.js
+- React
+- TypeScript
+- Material UI
+- Firebase
+- Cloudinary
+- Vercel
+
+# Author
+
+- Somaiya Noori (Backend developer)
+- Satayesh Esmaily (Frontend developer)
