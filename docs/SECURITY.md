@@ -1,4 +1,3 @@
-````markdown
 # Security Documentation
 
 This document outlines the security architecture and practices implemented in the Taply API.
@@ -48,31 +47,26 @@ match /designs/{designId} {
   allow update, delete: if request.auth != null
                         && request.auth.uid == resource.data.creatorUid;
 }
-```
+Feedback Sub-collection
 
-## Feedback Sub-collection
-
-```javascript
 match /designs/{designId}/feedback/{feedbackId} {
-// Public read access
-allow read: if true;
+  // Public read access
+  allow read: if true;
 
-// Anyone can create feedback (no login required)
-allow write: if true;
+  // Anyone can create feedback (no login required)
+  allow write: if true;
 }
-```
-
 Key Points
-✅ Public read for both designs and feedback (needed for share links)
-✅ Authentication required for design creation
-✅ Ownership check for design modification
-✅ Public write for feedback (intentional - anyone with link can comment)
+ Public read for both designs and feedback (needed for share links)
+ Authentication required for design creation
+ Ownership check for design modification
+ Public write for feedback (intentional - anyone with link can comment)
 Cloudinary Security
 Configuration
-✅ Signed uploads only - No unsigned upload presets
-✅ Server-side uploads - API credentials never exposed to client
-✅ HTTPS enforced - secure: true in configuration
-✅ Upload through API - Direct uploads from frontend disabled
+ Signed uploads only - No unsigned upload presets
+ Server-side uploads - API credentials never exposed to client
+ HTTPS enforced - secure: true in configuration
+ Upload through API - Direct uploads from frontend disabled
 Why This Matters
 If unsigned uploads were enabled, anyone could:
 
@@ -83,9 +77,9 @@ By requiring server-side signed uploads, every upload goes through our authentic
 
 Rate Limiting
 Limits
-Endpoint Window Max Requests
-POST /api/designs 1 hour 20
-POST /api/feedback 1 minute 10
+Endpoint	Window	Max Requests
+POST /api/designs	1 hour	20
+POST /api/feedback	1 minute	10
 Implementation
 Per-IP rate limiting using in-memory store
 Returns 429 Too Many Requests when exceeded
@@ -101,29 +95,30 @@ Database-based rate limiting
 Input Validation
 All API inputs are validated using Zod schemas:
 
-✅ Type validation
-✅ Length constraints (e.g., comment max 500 chars)
-✅ Range validation (e.g., coordinates 0-1)
-✅ Required field checks
+ Type validation
+ Length constraints (e.g., comment max 500 chars)
+ Range validation (e.g., coordinates 0-1)
+ Required field checks
 Invalid requests return 400 Bad Request with detailed error messages.
 
 File Upload Security
 Restrictions
-✅ File size limit: 10 MB
-✅ Allowed types: JPG, PNG, GIF, WEBP (MIME type checked)
-✅ Server-side parsing with formidable
-✅ Cloudinary processing (automatic optimization)
+ File size limit: 10 MB
+ Allowed types: JPG, PNG, GIF, WEBP (MIME type checked)
+ Server-side parsing with formidable
+ Cloudinary processing (automatic optimization)
 Environment Variables
 Sensitive Variables (Never Expose)
 These are server-side only:
 
-FIREBASE*PROJECT_ID
+FIREBASE_PROJECT_ID
 FIREBASE_CLIENT_EMAIL
 FIREBASE_PRIVATE_KEY
 CLOUDINARY_API_KEY
 CLOUDINARY_API_SECRET
 Public Variables (Safe to Expose)
-These start with NEXT_PUBLIC* and are bundled into the frontend:
+These start with NEXT_PUBLIC_ and are bundled into the frontend:
+
 
 NEXT_PUBLIC_FIREBASE_API_KEY
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
@@ -138,14 +133,14 @@ The Firebase Admin SDK has full access to Firestore, bypassing security rules. T
 
 The security rules protect:
 
-✅ Direct client access (from frontend)
-✅ Compromised client tokens
+ Direct client access (from frontend)
+ Compromised client tokens
 The Admin SDK in our API routes performs additional authorization checks (e.g., verifying user ownership).
 
 Public Feedback Creation
 Feedback creation is intentionally public (no auth required). This means:
 
-✅ Anyone with the link can leave feedback (desired behavior)
+ Anyone with the link can leave feedback (desired behavior)
 ⚠️ Anonymous spam is possible (mitigated by rate limiting)
 For future versions, consider:
 
@@ -155,18 +150,18 @@ Moderation tools
 Security Checklist
 Before deploying to production:
 
-All environment variables set in deployment platform
-Firestore rules deployed and tested
-Cloudinary upload presets verified (signed only)
-Rate limits configured appropriately
-HTTPS enforced on production domain
-Test endpoints (/api/dev/\*) removed or disabled
-Service account JSON not committed to Git
-.env.local in .gitignore
+ All environment variables set in deployment platform
+ Firestore rules deployed and tested
+ Cloudinary upload presets verified (signed only)
+ Rate limits configured appropriately
+ HTTPS enforced on production domain
+ Test endpoints (/api/dev/*)
+removed or disabled
+ Service account JSON not committed to Git
+ .env.local in .gitignore
 Reporting Security Issues
 If you discover a security vulnerability, please contact the backend developer directly. Do not open public GitHub issues for security concerns.
 
-## Last Updated: June 2026
-
-## Backend Developer: Somaiya Noori
-````
+Last Updated: June 2026
+Backend Developer: Somaiya Noori
+```

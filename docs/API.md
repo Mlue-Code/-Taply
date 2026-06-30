@@ -13,6 +13,7 @@
 3. [Endpoints](#endpoints)
    - [POST /api/designs](#post-apidesigns)
    - [POST /api/feedback](#post-apifeedback)
+   - [GET /api/designs/[shareableId]](#get-apidesignsshareable-id)
 4. [Code Examples](#code-examples)
 5. [Common Errors](#common-errors)
 
@@ -34,202 +35,142 @@ if (user) {
   const token = await user.getIdToken();
   // Send the token in the Authorization header
 }
-```
+Header Format
+http
 
-### Header Format
-
-```http
 Authorization: Bearer <firebase-id-token>
-```
+Important: The word Bearer followed by a space before the token is required.
 
-> **Important:** The word `Bearer` followed by a space before the token is required.
-
----
-
-## Error Format
-
+Error Format
 All API errors follow this format:
 
-```json
 {
   "error": "ERROR_CODE",
   "message": "Human-readable error message"
 }
-```
-
-### Error Codes
-
-| Code               | Description                             |
-| ------------------ | --------------------------------------- |
-| `UNAUTHORIZED`     | Missing or invalid authentication token |
-| `VALIDATION_ERROR` | Invalid request data                    |
-| `NOT_FOUND`        | Resource not found                      |
-| `FORBIDDEN`        | Access denied                           |
-| `INTERNAL_ERROR`   | Internal server error                   |
-
----
-
-## Endpoints
-
----
-
-### POST /api/designs
-
+Error Codes
+Code	Description
+UNAUTHORIZED	Missing or invalid authentication token
+VALIDATION_ERROR	Invalid request data
+NOT_FOUND	Resource not found
+FORBIDDEN	Access denied
+INTERNAL_ERROR	Internal server error
+Endpoints
+POST /api/designs
 Upload a new design and receive a shareable link.
 
-#### Authentication
+Authentication
+Required
 
-**Required**
+Request
+URL: POST /api/designs
 
-#### Request
+Headers:
 
-**URL:** `POST /api/designs`
+Header	Value	Required
+Authorization	Bearer <token>	Yes
+Content-Type	multipart/form-data	Yes (automatically set by the browser)
+Body (form-data):
 
-**Headers:**
+Field	Type	Required	Description
+image	File	Yes	Design image (max 10MB)
+Allowed Image Types:
 
-| Header          | Value                 | Required                               |
-| --------------- | --------------------- | -------------------------------------- |
-| `Authorization` | `Bearer <token>`      | Yes                                    |
-| `Content-Type`  | `multipart/form-data` | Yes (automatically set by the browser) |
+image/jpeg
+image/png
+image/gif
+image/webp
+Response
+Success - 201 Created
 
-**Body (form-data):**
 
-| Field   | Type | Required | Description             |
-| ------- | ---- | -------- | ----------------------- |
-| `image` | File | Yes      | Design image (max 10MB) |
-
-**Allowed Image Types:**
-
-- `image/jpeg`
-- `image/png`
-- `image/gif`
-- `image/webp`
-
-#### Response
-
-**Success - 201 Created**
-
-```json
 {
   "id": "abc123xyz",
   "shareableId": "ckpqr5w8x000abc",
   "imageUrl": "https://res.cloudinary.com/taply/image/upload/v1234/taply/designs/abc.jpg",
   "createdAt": "2025-01-15T10:30:00.000Z"
 }
-```
+Response Fields:
 
-**Response Fields:**
+Field	Type	Description
+id	string	Internal design ID (Firestore document ID)
+shareableId	string	Public ID used for generating shareable URLs
+imageUrl	string	Direct image URL
+createdAt	string	Creation timestamp (ISO 8601)
+Error Responses
+401 Unauthorized - Missing or invalid token
 
-| Field         | Type   | Description                                  |
-| ------------- | ------ | -------------------------------------------- |
-| `id`          | string | Internal design ID (Firestore document ID)   |
-| `shareableId` | string | Public ID used for generating shareable URLs |
-| `imageUrl`    | string | Direct image URL                             |
-| `createdAt`   | string | Creation timestamp (ISO 8601)                |
 
-#### Error Responses
-
-**401 Unauthorized** - Missing or invalid token
-
-```json
 {
   "error": "UNAUTHORIZED",
   "message": "Authorization header missing"
 }
-```
+400 Bad Request - Missing or invalid file
 
-**400 Bad Request** - Missing or invalid file
 
-```json
 {
   "error": "VALIDATION_ERROR",
   "message": "No image file provided. Use field name \"image\""
 }
-```
+400 Bad Request - Unsupported file type
 
-**400 Bad Request** - Unsupported file type
-
-```json
 {
   "error": "VALIDATION_ERROR",
   "message": "Only image files are allowed"
 }
-```
+405 Method Not Allowed - Invalid HTTP method
 
-**405 Method Not Allowed** - Invalid HTTP method
-
-```json
 {
   "error": "INTERNAL_ERROR",
   "message": "Method GET Not Allowed"
 }
-```
+500 Internal Server Error - Server error
 
-**500 Internal Server Error** - Server error
-
-```json
 {
   "error": "INTERNAL_ERROR",
   "message": "Failed to upload image"
 }
-```
-
----
-
-### POST /api/feedback
-
+POST /api/feedback
 Submit feedback on a design at specific coordinates.
 
-#### Authentication
+Authentication
+Not Required (Public endpoint)
 
-**Not Required** (Public endpoint)
+Anyone with a shareable link can submit feedback without logging in.
 
-> Anyone with a shareable link can submit feedback without logging in.
+Request
+URL: POST /api/feedback
 
-#### Request
+Headers:
 
-**URL:** `POST /api/feedback`
+Header	Value	Required
+Content-Type	application/json	Yes
+Body (JSON):
 
-**Headers:**
-
-| Header         | Value              | Required |
-| -------------- | ------------------ | -------- |
-| `Content-Type` | `application/json` | Yes      |
-
-**Body (JSON):**
-
-| Field      | Type   | Required | Constraints     | Description                            |
-| ---------- | ------ | -------- | --------------- | -------------------------------------- |
-| `designId` | string | Yes      | Non-empty       | The ID of the design to leave feedback |
-| `comment`  | string | Yes      | 1-500 chars     | The feedback text                      |
-| `x`        | number | Yes      | Between 0 and 1 | Horizontal coordinate (relative)       |
-| `y`        | number | Yes      | Between 0 and 1 | Vertical coordinate (relative)         |
-
-**About Coordinates:**
+Field	Type	Required	Constraints	Description
+designId	string	Yes	Non-empty	The ID of the design to leave feedback
+comment	string	Yes	1-500 chars	The feedback text
+x	number	Yes	Between 0 and 1	Horizontal coordinate (relative)
+y	number	Yes	Between 0 and 1	Vertical coordinate (relative)
+About Coordinates:
 
 Coordinates are normalized values between 0 and 1, making them responsive across different screen sizes:
 
-- `x = 0` → Left edge of the image
-- `x = 1` → Right edge of the image
-- `y = 0` → Top edge of the image
-- `y = 1` → Bottom edge of the image
+x = 0 → Left edge of the image
+x = 1 → Right edge of the image
+y = 0 → Top edge of the image
+y = 1 → Bottom edge of the image
+Example Request Body:
 
-**Example Request Body:**
-
-```json
 {
   "designId": "abc123xyz",
   "comment": "Looking great! Maybe try a brighter color here.",
   "x": 0.45,
   "y": 0.78
 }
-```
+Response
+Success - 201 Created
 
-#### Response
-
-**Success - 201 Created**
-
-```json
 {
   "id": "ckpqr5w8x000abc",
   "comment": "Looking great! Maybe try a brighter color here.",
@@ -237,109 +178,164 @@ Coordinates are normalized values between 0 and 1, making them responsive across
   "y": 0.78,
   "createdAt": "2025-01-15T12:30:00.000Z"
 }
-```
+Response Fields:
 
-**Response Fields:**
+Field	Type	Description
+id	string	Unique ID of the created feedback
+comment	string	The feedback text (trimmed)
+x	number	Horizontal coordinate (0-1)
+y	number	Vertical coordinate (0-1)
+createdAt	string	Creation timestamp (ISO 8601)
+Error Responses
+400 Bad Request - Invalid data
 
-| Field       | Type   | Description                       |
-| ----------- | ------ | --------------------------------- |
-| `id`        | string | Unique ID of the created feedback |
-| `comment`   | string | The feedback text (trimmed)       |
-| `x`         | number | Horizontal coordinate (0-1)       |
-| `y`         | number | Vertical coordinate (0-1)         |
-| `createdAt` | string | Creation timestamp (ISO 8601)     |
-
-#### Error Responses
-
-**400 Bad Request** - Invalid data
-
-```json
 {
   "error": "VALIDATION_ERROR",
   "message": "comment: comment cannot be empty"
 }
-```
+Other VALIDATION_ERROR examples:
 
-**Other VALIDATION_ERROR examples:**
 
-```json
 {
   "error": "VALIDATION_ERROR",
   "message": "x: x must be between 0 and 1"
 }
-```
 
-```json
 {
   "error": "VALIDATION_ERROR",
   "message": "comment: comment must be 500 characters or less"
 }
-```
 
-```json
 {
   "error": "VALIDATION_ERROR",
   "message": "designId: designId cannot be empty, comment: comment cannot be empty"
 }
-```
+404 Not Found - Design does not exist
 
-**404 Not Found** - Design does not exist
-
-```json
 {
   "error": "NOT_FOUND",
   "message": "Design with id \"abc123\" not found"
 }
-```
+405 Method Not Allowed - Invalid HTTP method
 
-````json
-,
-{
-  "name": "Create Feedback - Method Not Allowed",
-  "request": {
-    "method": "GET",
-    "header": [],
-    "url": {
-      "raw": "{{baseUrl}}/api/feedback",
-      "host": ["{{baseUrl}}"],
-      "path": ["api", "feedback"]
-    },
-    "description": "Test: GET method should be rejected (only POST allowed)"
-  },
-  "response": [
-    {
-      "name": "Error - 405 Method Not Allowed",
-      "status": "Method Not Allowed",
-      "code": 405,
-      "body": "{\n  \"error\": \"INTERNAL_ERROR\",\n  \"message\": \"Method GET Not Allowed\"\n}"
-    }
-  ]
-}
-**405 Method Not Allowed** - Invalid HTTP method
 
-```json
 {
   "error": "INTERNAL_ERROR",
   "message": "Method GET Not Allowed"
 }
-````
+500 Internal Server Error - Server error
 
-**500 Internal Server Error** - Server error
-
-```json
 {
   "error": "INTERNAL_ERROR",
   "message": "Failed to create feedback"
 }
-```
+GET /api/designs/[shareableId]
+Retrieve a design along with all its feedback by shareable ID.
 
----
+Authentication
+Not Required (Public endpoint)
 
-## Code Examples
+This endpoint is used for the public review page where anyone with the shareable link can view the design and existing feedback.
 
-### Upload Design (TypeScript + Fetch)
+Request
+URL: GET /api/designs/[shareableId]
 
-```typescript
+Path Parameters:
+
+Parameter	Type	Required	Description
+shareableId	string	Yes	The public shareable ID of the design
+Headers: None required
+
+Example Request:
+
+http
+
+GET /api/designs/ckpqr5w8x000abc HTTP/1.1
+Host: localhost:3000
+Response
+Success - 200 OK
+
+
+{
+  "design": {
+    "id": "abc123xyz",
+    "shareableId": "ckpqr5w8x000abc",
+    "imageUrl": "https://res.cloudinary.com/taply/image/upload/v1234/design.jpg",
+    "publicId": "taply/designs/abc",
+    "creatorUid": "user-uid-123",
+    "createdAt": "2025-01-15T10:30:00.000Z"
+  },
+  "feedback": [
+    {
+      "id": "feedback1",
+      "comment": "Looking great!",
+      "x": 0.5,
+      "y": 0.5,
+      "createdAt": "2025-01-15T12:00:00.000Z"
+    },
+    {
+      "id": "feedback2",
+      "comment": "Try a brighter color here",
+      "x": 0.3,
+      "y": 0.7,
+      "createdAt": "2025-01-15T11:30:00.000Z"
+    }
+  ]
+}
+Response Fields:
+
+Field	Type	Description
+design	object	The design object
+feedback	array	Array of feedback (sorted by date, newest first)
+Design Object:
+
+Field	Type	Description
+id	string	Internal Firestore document ID
+shareableId	string	Public shareable ID
+imageUrl	string	Cloudinary image URL
+publicId	string	Cloudinary public ID
+creatorUid	string	UID of the user who uploaded
+createdAt	string	Creation timestamp (ISO 8601)
+Feedback Object:
+
+Field	Type	Description
+id	string	Unique feedback ID
+comment	string	Feedback text
+x	number	Horizontal coordinate (0-1)
+y	number	Vertical coordinate (0-1)
+createdAt	string	Creation timestamp (ISO 8601)
+Error Responses
+400 Bad Request - Missing or invalid shareableId
+
+{
+  "error": "VALIDATION_ERROR",
+  "message": "shareableId is required"
+}
+404 Not Found - Design does not exist
+
+
+{
+  "error": "NOT_FOUND",
+  "message": "Design with shareableId \"abc123\" not found"
+}
+405 Method Not Allowed - Invalid HTTP method
+
+
+{
+  "error": "INTERNAL_ERROR",
+  "message": "Method POST Not Allowed"
+}
+500 Internal Server Error - Server error
+
+
+{
+  "error": "INTERNAL_ERROR",
+  "message": "Failed to fetch design"
+}
+Code Examples
+Upload Design (TypeScript + Fetch)
+TypeScript
+
 import { getAuth } from "firebase/auth";
 
 async function uploadDesign(file: File) {
@@ -376,11 +372,8 @@ async function uploadDesign(file: File) {
   const data = await response.json();
   return data;
 }
-```
+Submit Feedback (TypeScript + Fetch)
 
-### Submit Feedback (TypeScript + Fetch)
-
-```typescript
 interface CreateFeedbackRequest {
   designId: string;
   comment: string;
@@ -429,11 +422,117 @@ try {
 } catch (error) {
   console.error("Failed:", error);
 }
-```
+Fetch Design with Feedback (TypeScript + Fetch)
 
-### Click-to-Feedback Component (Complete Example)
+interface Design {
+  id: string;
+  shareableId: string;
+  imageUrl: string;
+  publicId: string;
+  creatorUid: string;
+  createdAt: string;
+}
 
-```typescript
+interface Feedback {
+  id: string;
+  comment: string;
+  x: number;
+  y: number;
+  createdAt: string;
+}
+
+interface DesignResponse {
+  design: Design;
+  feedback: Feedback[];
+}
+
+async function fetchDesign(shareableId: string): Promise<DesignResponse> {
+  const response = await fetch(`/api/designs/${shareableId}`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message);
+  }
+
+  return response.json();
+}
+
+// Usage
+try {
+  const data = await fetchDesign("ckpqr5w8x000abc");
+  console.log("Design:", data.design);
+  console.log("Feedback count:", data.feedback.length);
+} catch (error) {
+  console.error("Failed to fetch:", error);
+}
+Fetch Design with SWR (React)
+
+import useSWR from "swr";
+
+interface DesignResponse {
+  design: {
+    id: string;
+    shareableId: string;
+    imageUrl: string;
+    publicId: string;
+    creatorUid: string;
+    createdAt: string;
+  };
+  feedback: Array<{
+    id: string;
+    comment: string;
+    x: number;
+    y: number;
+    createdAt: string;
+  }>;
+}
+
+const fetcher = async (url: string): Promise<DesignResponse> => {
+  const res = await fetch(url);
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message);
+  }
+  return res.json();
+};
+
+export function useDesign(shareableId: string) {
+  const { data, error, isLoading, mutate } = useSWR<DesignResponse>(
+    shareableId ? `/api/designs/${shareableId}` : null,
+    fetcher
+  );
+
+  return {
+    design: data?.design,
+    feedback: data?.feedback || [],
+    isLoading,
+    error,
+    refresh: mutate, // Call this after creating new feedback
+  };
+}
+
+// Usage in component
+function ReviewPage({ shareableId }: { shareableId: string }) {
+  const { design, feedback, isLoading, error, refresh } =
+    useDesign(shareableId);
+
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+  if (!design) return <p>Design not found</p>;
+
+  return (
+    <div>
+      <img src={design.imageUrl} alt="Design" />
+      <p>Feedback count: {feedback.length}</p>
+      {feedback.map((fb) => (
+        <div key={fb.id}>{fb.comment}</div>
+      ))}
+    </div>
+  );
+}
+Click-to-Feedback Component (Complete Example)
+TypeScript
+
 "use client";
 
 import { useState, useRef } from "react";
@@ -609,9 +708,7 @@ export function FeedbackCanvas({
               {comment.length}/500 characters
             </p>
 
-            {error && (
-              <p style={{ color: "red", fontSize: 14 }}>{error}</p>
-            )}
+            {error && <p style={{ color: "red", fontSize: 14 }}>{error}</p>}
 
             <div
               style={{
@@ -648,21 +745,16 @@ export function FeedbackCanvas({
     </div>
   );
 }
-```
+cURL (Terminal Testing)
+Upload Design:
 
-### cURL (Terminal Testing)
 
-**Upload Design:**
-
-```bash
 curl -X POST http://localhost:3000/api/designs \
   -H "Authorization: Bearer YOUR_FIREBASE_TOKEN" \
   -F "image=@/path/to/your/design.jpg"
-```
+Submit Feedback:
 
-**Submit Feedback:**
 
-```bash
 curl -X POST http://localhost:3000/api/feedback \
   -H "Content-Type: application/json" \
   -d '{
@@ -671,15 +763,12 @@ curl -X POST http://localhost:3000/api/feedback \
     "x": 0.5,
     "y": 0.5
   }'
-```
+Fetch Design with Feedback:
 
----
+curl http://localhost:3000/api/designs/ckpqr5w8x000abc
+Common Errors & Solutions
+"Authorization header missing"
 
-## Common Errors & Solutions
-
-### "Authorization header missing"
-
-```text
 Cause:
   No Firebase token was sent with the request.
 
@@ -688,11 +777,8 @@ Solution:
   - Await getIdToken().
   - Send the header in the format:
     "Bearer <token>"
-```
+"Invalid or expired token"
 
-### "Invalid or expired token"
-
-```text
 Cause:
   The token is expired, invalid, or malformed.
 
@@ -700,11 +786,8 @@ Solution:
   - Refresh the token using getIdToken(true).
   - Verify your Firebase configuration.
   - Make sure the token comes from the same Firebase project.
-```
+"No image file provided"
 
-### "No image file provided"
-
-```text
 Cause:
   The form-data field name is incorrect.
 
@@ -714,11 +797,8 @@ Solution:
 
   The field name must be exactly:
     image
-```
+"Only image files are allowed"
 
-### "Only image files are allowed"
-
-```text
 Cause:
   The uploaded file is not an image.
 
@@ -728,11 +808,8 @@ Solution:
   - PNG
   - GIF
   - WEBP
-```
+Incorrect Content-Type Boundary
 
-### Incorrect Content-Type Boundary
-
-```text
 Cause:
   Content-Type was manually set for multipart/form-data.
 
@@ -747,22 +824,16 @@ Correct:
   }
 
 Let the browser automatically set Content-Type with the correct boundary.
-```
+"comment cannot be empty"
 
-### "comment cannot be empty"
-
-```text
 Cause:
   The comment field is empty or only whitespace.
 
 Solution:
   - Ensure the comment has at least 1 character after trimming.
   - Maximum length is 500 characters.
-```
+"x must be between 0 and 1"
 
-### "x must be between 0 and 1"
-
-```text
 Cause:
   Coordinates are outside the 0-1 range.
 
@@ -774,11 +845,8 @@ Solution:
   const y = (e.clientY - rect.top) / rect.height;
 
   // Both x and y will always be between 0 and 1
-```
+"Design with id ... not found"
 
-### "Design with id ... not found"
-
-```text
 Cause:
   The provided designId does not exist in the database.
 
@@ -786,11 +854,19 @@ Solution:
   - Verify you are sending the correct designId.
   - Use the "id" field from the upload response (not "shareableId").
   - Check if the design was deleted.
-```
+"Design with shareableId ... not found"
+text
 
-### "Failed to fetch" or CORS Errors
+Cause:
+  The provided shareableId does not exist in the database.
 
-```text
+Solution:
+  - Verify the shareable link is correct and has not been tampered with.
+  - Check if the design was deleted.
+  - Make sure you are using the "shareableId" value from the upload response.
+"Failed to fetch" or CORS Errors
+text
+
 Cause:
   Network issues or CORS misconfiguration.
 
@@ -798,20 +874,18 @@ Solution:
   - Verify the API URL is correct.
   - Check the browser Network tab for details.
   - Make sure you're calling the correct base URL.
-```
-
----
-
-## Support
-
+Support
 If you encounter any issues:
 
-1. Review this documentation carefully.
-2. Check the browser console for errors.
-3. Inspect the Network tab (request/response details).
-4. Contact the backend developer.
+Review this documentation carefully.
+Check the browser console for errors.
+Inspect the Network tab (request/response details).
+Contact the backend developer.
+Last Updated: June 2026
+Backend Developer: Somaiya Noori
 
----
 
-**Last Updated:** June 2026  
-**Backend Developer:** Somaiya Noori
+
+
+
+```
