@@ -34,13 +34,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/designs",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "designs"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "designs"]
             },
             "description": "Upload a new design image. Requires Firebase Authentication. Returns the design ID and a shareable ID for public access."
           },
@@ -142,13 +137,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/feedback",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "feedback"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "feedback"]
             },
             "description": "Submit feedback on a design at specific coordinates. Public endpoint - no authentication required. Coordinates must be normalized to 0-1 range."
           },
@@ -193,13 +183,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/feedback",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "feedback"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "feedback"]
             },
             "description": "Test validation: empty comment should return 400 VALIDATION_ERROR"
           },
@@ -239,13 +224,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/feedback",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "feedback"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "feedback"]
             },
             "description": "Test validation: comment longer than 500 characters should return 400"
           },
@@ -285,13 +265,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/feedback",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "feedback"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "feedback"]
             },
             "description": "Test validation: coordinates outside 0-1 range should be rejected"
           },
@@ -331,13 +306,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/feedback",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "feedback"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "feedback"]
             },
             "description": "Test validation: missing required fields should be rejected"
           },
@@ -377,13 +347,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/feedback",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "feedback"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "feedback"]
             },
             "description": "Test: providing a designId that doesn't exist should return 404"
           },
@@ -423,13 +388,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/feedback",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "feedback"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "feedback"]
             },
             "description": "Test: boundary values (0 and 1) should be accepted"
           },
@@ -455,7 +415,7 @@
     {
       "id": "9af0ec48-8757-4c8d-9119-cdb4858aae6d",
       "key": "baseUrl",
-      "value": "http://localhost:3000",
+      "value": "https://taply-rust.vercel.app",
       "description": "API base URL"
     },
     {

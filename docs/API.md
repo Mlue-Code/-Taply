@@ -2,7 +2,7 @@
 
 > **Version:** 1.0.0
 > **Base URL (Dev):** `http://localhost:3000`
-> **Base URL (Prod):** `https://taply.vercel.app` _(coming soon)_
+> **Base URL (Prod):** `https://taply-rust.vercel.app`
 
 ---
 
