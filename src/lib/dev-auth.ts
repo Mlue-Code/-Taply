@@ -13,6 +13,10 @@ type DevTokenResponse =
     };
 
 export async function getDevIdToken(): Promise<string> {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Please login with Firebase Auth.");
+  }
+
   const secret = process.env.NEXT_PUBLIC_DEV_TOKEN_SECRET;
 
   if (!secret) {

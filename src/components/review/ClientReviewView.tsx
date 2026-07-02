@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import Image from "next/image";
 import { IconPlus } from "@tabler/icons-react";
 import Navbar from "@/components/layout/Navbar";
 import AssetIcon from "@/components/shared/AssetIcon";
@@ -215,14 +216,18 @@ export default function ClientReviewView({ shareableId, sessionName }: ClientRev
             </div>
 
             <div className="relative">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                ref={imageRef}
-                src={design.imageUrl}
-                alt={design.shareableId}
-                className="h-[792px] w-full bg-white object-cover"
-                onClick={handleImageClick}
-              />
+              <div className="relative h-[792px] w-full bg-white">
+                <Image
+                  ref={imageRef}
+                  src={design.imageUrl}
+                  alt={design.shareableId}
+                  fill
+                  sizes="(max-width: 1020px) 100vw, 1020px"
+                  preload
+                  className="object-cover"
+                  onClick={handleImageClick}
+                />
+              </div>
 
               {feedback.map((item, index) => (
                 <button
