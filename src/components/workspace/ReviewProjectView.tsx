@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import Navbar from "@/components/layout/Navbar";
@@ -10,6 +10,7 @@ import ProjectSection from "@/components/workspace/ProjectSection";
 import ProjectStats from "@/components/workspace/ProjectStats";
 import CreateReviewSessionModal from "@/components/workspace/CreateReviewSessionModal";
 import UploadDesignModal from "@/components/workspace/UploadDesignModal";
+import { getDevIdToken } from "@/lib/dev-auth";
 import imageIcon from "../../public/Icon-assets/image.svg";
 import clipboardTextIcon from "../../public/Icon-assets/clipboard-text.svg";
 import directSendIcon from "../../public/Icon-assets/direct-send.svg";
@@ -24,9 +25,11 @@ type ReviewProjectViewProps = {
 
 export type DesignItem = {
   id: string;
+  shareableId: string;
   name: string;
   uploadedAt: string;
   previewUrl: string;
+  imageUrl: string;
 };
 
 function formatUploadedAt(date: Date) {
@@ -42,7 +45,7 @@ function stripExtension(fileName: string) {
 }
 
 function makeId() {
-  return globalThis.crypto?.randomUUID?.() ?? `design-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  return globalThis.crypto?.randomUUID?.() ?? `session-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function DesignCard({
@@ -91,15 +94,7 @@ export default function ReviewProjectView({
   const [sessionName, setSessionName] = useState("");
   const [selectedDesignIds, setSelectedDesignIds] = useState<string[]>([]);
   const [designs, setDesigns] = useState<DesignItem[]>([]);
-  const previewUrlsRef = useRef<string[]>([]);
   const router = useRouter();
-
-  useEffect(() => {
-    return () => {
-      previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
-      previewUrlsRef.current = [];
-    };
-  }, []);
 
   const stats = [
     {
@@ -119,33 +114,6 @@ export default function ReviewProjectView({
       icon: messageRemoveIcon,
     },
   ];
-
-  const handleUploadDesign = async ({ name, file }: { name: string; file: File }) => {
-    const previewUrl = URL.createObjectURL(file);
-    previewUrlsRef.current.push(previewUrl);
-
-    setDesigns((current) => [
-      {
-        id: makeId(),
-        name: name.trim() || stripExtension(file.name),
-        uploadedAt: formatUploadedAt(new Date()),
-        previewUrl,
-      },
-      ...current,
-    ]);
-  };
-
-  const handleRemoveDesign = (id: string) => {
-    setDesigns((current) => {
-      const target = current.find((design) => design.id === id);
-      if (target) {
-        URL.revokeObjectURL(target.previewUrl);
-        previewUrlsRef.current = previewUrlsRef.current.filter((url) => url !== target.previewUrl);
-      }
-
-      return current.filter((design) => design.id !== id);
-    });
-  };
 
   const openUploadModal = () => {
     setUploadModalKey((current) => current + 1);
@@ -169,10 +137,17 @@ export default function ReviewProjectView({
     sessionName: string;
     selectedDesignIds: string[];
   }) => {
-    const shareableId = makeId();
     const selectedDesigns = designs.filter((design) => nextSelectedDesignIds.includes(design.id));
+    const primaryDesign = selectedDesigns[0];
+
+    if (!primaryDesign) {
+      return;
+    }
+
+    const shareableId = primaryDesign.shareableId;
     const payload = {
       shareableId,
+      sessionId: makeId(),
       sessionName: nextSessionName.trim() || "Client Review - round 1",
       projectName,
       projectDescription,
@@ -181,13 +156,56 @@ export default function ReviewProjectView({
     };
 
     if (typeof window !== "undefined") {
-      window.sessionStorage.setItem(`taply-review-session:${shareableId}`, JSON.stringify(payload));
+      window.localStorage.setItem(`taply-review-session:${shareableId}`, JSON.stringify(payload));
     }
 
     setIsSessionModalOpen(false);
     router.push(
-      `/review/${shareableId}?view=session&name=${encodeURIComponent(payload.projectName)}&description=${encodeURIComponent(payload.projectDescription)}`,
+      `/review/${shareableId}?view=session&name=${encodeURIComponent(payload.projectName)}&description=${encodeURIComponent(payload.projectDescription)}&sessionName=${encodeURIComponent(payload.sessionName)}`,
     );
+  };
+
+  const handleUploadDesign = async ({ name, file }: { name: string; file: File }) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("name", name.trim() || stripExtension(file.name));
+
+      const token = await getDevIdToken();
+
+      const response = await fetch("/api/designs", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const result = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(result?.message || "Failed to upload design");
+      }
+
+      setDesigns((current) => [
+        {
+          id: result.id,
+          shareableId: result.shareableId,
+          name: name.trim() || stripExtension(file.name),
+          uploadedAt: formatUploadedAt(new Date(result.createdAt)),
+          previewUrl: result.imageUrl,
+          imageUrl: result.imageUrl,
+        },
+        ...current,
+      ]);
+    } catch (error) {
+      throw new Error(
+        error instanceof Error ? error.message : "Upload failed. Please check your token and environment variables.",
+      );
+    }
+  };
+
+  const handleRemoveDesign = (id: string) => {
+    setDesigns((current) => current.filter((design) => design.id !== id));
   };
 
   const sessionActionClassName =

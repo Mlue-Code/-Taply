@@ -12,7 +12,7 @@ type NavbarProps = {
   variant?: "home" | "workspace" | "project";
   actionLabel?: string;
   actionHref?: string;
-  actionIcon?: ReactNode;
+  actionIcon?: ReactNode | null;
   actionOnClick?: () => void;
 };
 
@@ -28,7 +28,7 @@ export default function Navbar({
   const ctaLabel = actionLabel ?? (isProject ? "New Project" : "Start");
   const ctaHref = actionHref ?? (isProject ? "/review/new" : "/workspace");
   const defaultIcon = isProject ? <IconPlus size={12} stroke={2.4} /> : <AssetIcon src={arrowRight} className="h-[12px] w-[12px]" />;
-  const resolvedIcon = actionIcon ?? defaultIcon;
+  const resolvedIcon = actionIcon === undefined ? defaultIcon : actionIcon;
 
   return (
     <header className="relative z-10 border-b border-[#e9e5f0] bg-white/90">
