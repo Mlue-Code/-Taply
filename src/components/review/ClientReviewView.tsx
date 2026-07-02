@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import Image from "next/image";
 import { IconPlus } from "@tabler/icons-react";
 import Navbar from "@/components/layout/Navbar";
@@ -42,26 +48,41 @@ function ToolButton({
       type="button"
       onClick={onClick}
       className={`inline-flex h-[56px] items-center justify-center gap-1 rounded-[14px] px-4 transition ${
-        active ? "bg-[#efe7ff] text-[#6f2cf6]" : "text-[#6f2cf6] hover:bg-[#f3edff]"
+        active
+          ? "bg-[#efe7ff] text-[#6f2cf6]"
+          : "text-[#6f2cf6] hover:bg-[#f3edff]"
       }`}
       aria-label={label}
     >
       {icon}
-      {showChevron ? <AssetIcon src={arrowDownIcon} className="h-[14px] w-[14px]" /> : null}
+      {showChevron ? (
+        <AssetIcon src={arrowDownIcon} className="h-[14px] w-[14px]" />
+      ) : null}
     </button>
   );
 }
 
-export default function ClientReviewView({ shareableId, sessionName }: ClientReviewViewProps) {
+export default function ClientReviewView({
+  shareableId,
+  sessionName,
+}: ClientReviewViewProps) {
   const imageRef = useRef<HTMLImageElement>(null);
   const [design, setDesign] = useState<Design | null>(null);
   const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sessionTitle, setSessionTitle] = useState(sessionName || "Session Name");
-  const [activeTool, setActiveTool] = useState<"cursor" | "add" | "pin" | "pen" | "comment">("cursor");
+  const [sessionTitle, setSessionTitle] = useState(
+    sessionName || "Session Name",
+  );
+  const [activeTool, setActiveTool] = useState<
+    "cursor" | "add" | "pin" | "pen" | "comment"
+  >("cursor");
   const [composerOpen, setComposerOpen] = useState(false);
-  const [draft, setDraft] = useState<DraftFeedback>({ x: 0.5, y: 0.5, comment: "" });
+  const [draft, setDraft] = useState<DraftFeedback>({
+    x: 0.5,
+    y: 0.5,
+    comment: "",
+  });
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -69,8 +90,12 @@ export default function ClientReviewView({ shareableId, sessionName }: ClientRev
 
     const loadDesign = async () => {
       try {
-        const response = await fetch(`/api/designs/${encodeURIComponent(shareableId)}`);
-        const result = (await response.json()) as GetDesignResponse & { message?: string };
+        const response = await fetch(
+          `/api/designs/${encodeURIComponent(shareableId)}`,
+        );
+        const result = (await response.json()) as GetDesignResponse & {
+          message?: string;
+        };
 
         if (!response.ok) {
           throw new Error(result.message || "Failed to load design");
@@ -87,7 +112,11 @@ export default function ClientReviewView({ shareableId, sessionName }: ClientRev
         }
       } catch (loadError) {
         if (active) {
-          setError(loadError instanceof Error ? loadError.message : "Design not found.");
+          setError(
+            loadError instanceof Error
+              ? loadError.message
+              : "Design not found.",
+          );
         }
       } finally {
         if (active) {
@@ -149,7 +178,11 @@ export default function ClientReviewView({ shareableId, sessionName }: ClientRev
       setDraft((current) => ({ ...current, comment: "" }));
       setComposerOpen(false);
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Failed to submit feedback");
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Failed to submit feedback",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -167,7 +200,12 @@ export default function ClientReviewView({ shareableId, sessionName }: ClientRev
   if (loading) {
     return (
       <main className="min-h-screen bg-[#fbfbff]">
-        <Navbar variant="home" actionLabel="Submit" actionOnClick={handleTopSubmit} actionIcon={null} />
+        <Navbar
+          variant="home"
+          actionLabel="Submit"
+          actionOnClick={handleTopSubmit}
+          actionIcon={null}
+        />
         <div className="mx-auto flex min-h-[60vh] max-w-[1240px] items-center justify-center px-4">
           <p className="text-[15px] text-[#6f6b78]">Loading review...</p>
         </div>
@@ -178,9 +216,16 @@ export default function ClientReviewView({ shareableId, sessionName }: ClientRev
   if (error || !design) {
     return (
       <main className="min-h-screen bg-[#fbfbff]">
-        <Navbar variant="home" actionLabel="Submit" actionOnClick={handleTopSubmit} actionIcon={null} />
+        <Navbar
+          variant="home"
+          actionLabel="Submit"
+          actionOnClick={handleTopSubmit}
+          actionIcon={null}
+        />
         <div className="mx-auto flex min-h-[60vh] max-w-[1240px] items-center justify-center px-4">
-          <p className="text-[15px] text-[#d92d20]">{error || "Design not found."}</p>
+          <p className="text-[15px] text-[#d92d20]">
+            {error || "Design not found."}
+          </p>
         </div>
       </main>
     );
@@ -188,7 +233,12 @@ export default function ClientReviewView({ shareableId, sessionName }: ClientRev
 
   return (
     <main className="min-h-screen bg-[#fbfbff] text-[#1c1340]">
-      <Navbar variant="home" actionLabel="Submit" actionOnClick={handleTopSubmit} actionIcon={null} />
+      <Navbar
+        variant="home"
+        actionLabel="Submit"
+        actionOnClick={handleTopSubmit}
+        actionIcon={null}
+      />
 
       <div className="mx-auto w-full max-w-[1110px] px-4 pt-8 pb-20 xl:px-0">
         <div className="relative mx-auto w-full max-w-[1020px]">
@@ -204,7 +254,10 @@ export default function ClientReviewView({ shareableId, sessionName }: ClientRev
               <div className="flex items-center gap-10 text-[#6f2cf6]">
                 <div className="inline-flex items-center gap-1.5 text-[18px] font-medium">
                   50%
-                  <AssetIcon src={arrowDownIcon} className="h-[14px] w-[14px]" />
+                  <AssetIcon
+                    src={arrowDownIcon}
+                    className="h-[14px] w-[14px]"
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-1.5">
                   <span className="h-3 w-3 rounded-[4px] bg-[#6f2cf6]" />
@@ -223,7 +276,7 @@ export default function ClientReviewView({ shareableId, sessionName }: ClientRev
                   alt={design.shareableId}
                   fill
                   sizes="(max-width: 1020px) 100vw, 1020px"
-                  preload
+                  priority
                   className="object-cover"
                   onClick={handleImageClick}
                 />
@@ -249,33 +302,49 @@ export default function ClientReviewView({ shareableId, sessionName }: ClientRev
             <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-[14px] bg-[#f2ebff] px-5 py-4 shadow-[0_12px_24px_rgba(24,18,47,0.14)]">
               <ToolButton
                 label="Cursor"
-                icon={<AssetIcon src={cursorIcon} className="h-[34px] w-[34px]" />}
+                icon={
+                  <AssetIcon src={cursorIcon} className="h-[34px] w-[34px]" />
+                }
                 active={activeTool === "cursor"}
                 onClick={() => setActiveTool("cursor")}
                 showChevron
               />
               <ToolButton
                 label="Add"
-                icon={<AssetIcon src={messageAdd22Icon} className="h-[34px] w-[34px]" />}
+                icon={
+                  <AssetIcon
+                    src={messageAdd22Icon}
+                    className="h-[34px] w-[34px]"
+                  />
+                }
                 active={activeTool === "add"}
                 onClick={() => setActiveTool("add")}
               />
               <ToolButton
                 label="Pin"
-                icon={<AssetIcon src={locationIcon} className="h-[34px] w-[34px]" />}
+                icon={
+                  <AssetIcon src={locationIcon} className="h-[34px] w-[34px]" />
+                }
                 active={activeTool === "pin"}
                 onClick={() => setActiveTool("pin")}
               />
               <ToolButton
                 label="Pen"
-                icon={<AssetIcon src={magicpenIcon} className="h-[34px] w-[34px]" />}
+                icon={
+                  <AssetIcon src={magicpenIcon} className="h-[34px] w-[34px]" />
+                }
                 active={activeTool === "pen"}
                 onClick={() => setActiveTool("pen")}
                 showChevron
               />
               <ToolButton
                 label="Comment"
-                icon={<AssetIcon src={searchZoomInIcon} className="h-[34px] w-[34px]" />}
+                icon={
+                  <AssetIcon
+                    src={searchZoomInIcon}
+                    className="h-[34px] w-[34px]"
+                  />
+                }
                 active={activeTool === "comment"}
                 onClick={() => setActiveTool("comment")}
                 showChevron
@@ -299,7 +368,9 @@ export default function ClientReviewView({ shareableId, sessionName }: ClientRev
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-[22px] font-semibold text-[#121212]">Leave feedback</h3>
+              <h3 className="text-[22px] font-semibold text-[#121212]">
+                Leave feedback
+              </h3>
               <button
                 type="button"
                 onClick={() => setComposerOpen(false)}
@@ -315,7 +386,12 @@ export default function ClientReviewView({ shareableId, sessionName }: ClientRev
 
             <textarea
               value={draft.comment}
-              onChange={(event) => setDraft((current) => ({ ...current, comment: event.target.value }))}
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  comment: event.target.value,
+                }))
+              }
               rows={5}
               className="mt-4 w-full resize-none rounded-[13px] border border-[#d8c5ff] bg-[#f8f4ff] px-4 py-3 text-[15px] text-[#1a1722] outline-none placeholder:text-[#9a94a7] focus:border-[#b997ff]"
               placeholder="Write your feedback..."
