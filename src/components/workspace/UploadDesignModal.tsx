@@ -83,8 +83,12 @@ export default function UploadDesignModal({ open, onClose, onUpload }: UploadDes
         file: selectedFile,
       });
       onClose();
-    } catch {
-      setError("Upload failed. Please try again.");
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Upload failed. Please try again.",
+      );
     } finally {
       setIsSubmitting(false);
     }

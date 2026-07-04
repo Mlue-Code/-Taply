@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { IconChevronLeft, IconCopy, IconPlus } from "@tabler/icons-react";
 import Navbar from "@/components/layout/Navbar";
 import AssetIcon from "@/components/shared/AssetIcon";
 import type { DesignItem } from "@/components/workspace/ReviewProjectView";
+import type { GetDesignResponse } from "@/types/taply";
 import messages3Icon from "../../public/Icon-assets/messages-3.svg";
 import likeIcon from "../../public/Icon-assets/like.svg";
 import dangerIcon from "../../public/Icon-assets/danger.svg";
@@ -23,6 +24,9 @@ type ReviewSessionData = {
 
 type ReviewSessionViewProps = {
   shareableId: string;
+  sessionName?: string;
+  projectName?: string;
+  projectDescription?: string;
 };
 
 function StatCard({
@@ -47,39 +51,92 @@ function StatCard({
   );
 }
 
-export default function ReviewSessionView({ shareableId }: ReviewSessionViewProps) {
-  const [session] = useState<ReviewSessionData | null>(() => {
-    if (typeof window === "undefined") {
-      return null;
-    }
-
-    const stored = window.sessionStorage.getItem(`taply-review-session:${shareableId}`);
-    if (stored) {
-      try {
-        return JSON.parse(stored) as ReviewSessionData;
-      } catch {
-        // Fall through to fallback rendering.
-      }
-    }
-
-    return {
-      shareableId,
-      sessionName: "Client Review - round 1",
-      projectName: "Project name",
-      projectDescription: "",
-      selectedDesignIds: [],
-      designs: [],
-    };
-  });
+export default function ReviewSessionView({
+  shareableId,
+  sessionName,
+  projectName,
+  projectDescription,
+}: ReviewSessionViewProps) {
+  const [session, setSession] = useState<ReviewSessionData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadSession = async () => {
+      const storedSession = typeof window !== "undefined"
+        ? window.localStorage.getItem(`taply-review-session:${shareableId}`)
+        : null;
+
+      if (storedSession) {
+        try {
+          const parsed = JSON.parse(storedSession) as ReviewSessionData;
+          if (active) {
+            setSession(parsed);
+            setLoading(false);
+          }
+          return;
+        } catch {
+          // fall through to backend fallback
+        }
+      }
+
+      try {
+        const response = await fetch(`/api/designs/${encodeURIComponent(shareableId)}`);
+        const result = (await response.json()) as GetDesignResponse & { message?: string };
+
+        if (!response.ok) {
+          throw new Error(result.message || "Failed to load design");
+        }
+
+        if (!active) {
+          return;
+        }
+
+        setSession({
+          shareableId,
+          sessionName: sessionName || "Client Review - round 1",
+          projectName: projectName || "Project name",
+          projectDescription: projectDescription || "",
+          selectedDesignIds: [result.design.id],
+          designs: [
+            {
+              id: result.design.id,
+              shareableId: result.design.shareableId,
+              name: result.design.shareableId,
+              uploadedAt: result.design.createdAt,
+              previewUrl: result.design.imageUrl,
+              imageUrl: result.design.imageUrl,
+            },
+          ],
+        });
+      } catch {
+        if (active) {
+          setSession(null);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadSession();
+
+    return () => {
+      active = false;
+    };
+  }, [projectDescription, projectName, sessionName, shareableId]);
 
   const shareUrl = useMemo(() => {
     if (typeof window === "undefined") {
-      return `/review/${shareableId}?view=session`;
+      return `/review/${shareableId}?view=client`;
     }
 
-    return `${window.location.origin}/review/${shareableId}?view=session`;
-  }, [shareableId]);
+    const title = session?.sessionName ?? sessionName ?? "Session Name";
+    return `${window.location.origin}/review/${shareableId}?view=client&sessionName=${encodeURIComponent(title)}`;
+  }, [session?.sessionName, sessionName, shareableId]);
 
   const handleCopy = async () => {
     try {
@@ -91,8 +148,54 @@ export default function ReviewSessionView({ shareableId }: ReviewSessionViewProp
     }
   };
 
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-[#fbfbff]">
+        <Navbar
+          variant="home"
+          actionLabel="New Session"
+          actionHref={`/review/${shareableId}`}
+          actionIcon={<IconPlus size={12} stroke={2.4} />}
+        />
+        <div className="mx-auto flex min-h-[60vh] max-w-[1240px] items-center justify-center px-4">
+          <p className="text-[15px] text-[#6f6b78]">Loading review...</p>
+        </div>
+      </main>
+    );
+  }
+
   if (!session) {
-    return null;
+    return (
+      <main className="min-h-screen bg-[#fbfbff]">
+        <Navbar
+          variant="home"
+          actionLabel="New Session"
+          actionHref={`/review/${shareableId}`}
+          actionIcon={<IconPlus size={12} stroke={2.4} />}
+        />
+        <div className="mx-auto flex min-h-[60vh] max-w-[1240px] items-center justify-center px-4">
+          <p className="text-[15px] text-[#d92d20]">Design not found.</p>
+        </div>
+      </main>
+    );
+  }
+
+  const design = session.designs[0] ?? null;
+
+  if (!design) {
+    return (
+      <main className="min-h-screen bg-[#fbfbff]">
+        <Navbar
+          variant="home"
+          actionLabel="New Session"
+          actionHref={`/review/${shareableId}`}
+          actionIcon={<IconPlus size={12} stroke={2.4} />}
+        />
+        <div className="mx-auto flex min-h-[60vh] max-w-[1240px] items-center justify-center px-4">
+          <p className="text-[15px] text-[#d92d20]">Design not found.</p>
+        </div>
+      </main>
+    );
   }
 
   const feedbackStats = [
@@ -124,7 +227,12 @@ export default function ReviewSessionView({ shareableId }: ReviewSessionViewProp
 
   return (
     <main className="min-h-screen bg-[#fbfbff] text-[#13121a]">
-      <Navbar variant="home" actionLabel="+ New Session" actionHref={`/review/${shareableId}`} actionIcon={<IconPlus size={12} stroke={2.4} />} />
+      <Navbar
+        variant="home"
+        actionLabel="New Session"
+        actionHref={`/review/${shareableId}`}
+        actionIcon={<IconPlus size={12} stroke={2.4} />}
+      />
 
       <section className="border-b border-[#e9e5f0] bg-white">
         <div className="mx-auto flex h-[76px] w-full max-w-[1240px] items-center justify-between px-4 xl:px-0">
@@ -181,6 +289,28 @@ export default function ReviewSessionView({ shareableId }: ReviewSessionViewProp
           {feedbackStats.map((item) => (
             <StatCard key={item.title} title={item.title} value={item.value} icon={item.icon} tone={item.tone} />
           ))}
+        </section>
+
+        <section className="mt-14">
+          <h2 className="text-[22px] font-medium text-[#111111]">Selected Designs</h2>
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-[repeat(auto-fit,392px)]">
+            {session.designs.map((item) => (
+              <article
+                key={item.id}
+                className="flex h-[304px] w-full flex-col overflow-hidden rounded-[13px] border border-[#ece6f7] bg-white shadow-[0_16px_34px_rgba(26,15,54,0.12)]"
+              >
+                <div className="relative h-[232px] overflow-hidden bg-[#f7f2ff]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={item.previewUrl} alt={item.name} className="h-full w-full object-cover" />
+                </div>
+                <div className="px-4 py-4">
+                  <h3 className="truncate text-[16px] font-semibold text-[#121212]">{item.name}</h3>
+                  <p className="mt-1 text-[12px] text-[#8a8494]">Uploaded {item.uploadedAt}</p>
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section className="mt-14">
