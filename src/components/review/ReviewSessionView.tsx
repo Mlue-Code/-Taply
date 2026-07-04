@@ -1,26 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { IconChevronLeft, IconCopy, IconPlus } from "@tabler/icons-react";
 import Navbar from "@/components/layout/Navbar";
 import AssetIcon from "@/components/shared/AssetIcon";
-import type { DesignItem } from "@/components/workspace/ReviewProjectView";
-import type { GetDesignResponse } from "@/types/taply";
+import { useReviewSession } from "@/hooks/useReviewSession";
 import messages3Icon from "../../public/Icon-assets/messages-3.svg";
 import likeIcon from "../../public/Icon-assets/like.svg";
 import dangerIcon from "../../public/Icon-assets/danger.svg";
 import tickCircleIcon from "../../public/Icon-assets/tick-circle.svg";
 import infoCircleIcon from "../../public/Icon-assets/info-circle.svg";
-
-type ReviewSessionData = {
-  shareableId: string;
-  sessionName: string;
-  projectName: string;
-  projectDescription: string;
-  selectedDesignIds: string[];
-  designs: DesignItem[];
-};
 
 type ReviewSessionViewProps = {
   shareableId: string;
@@ -57,96 +47,11 @@ export default function ReviewSessionView({
   projectName,
   projectDescription,
 }: ReviewSessionViewProps) {
-  const [session, setSession] = useState<ReviewSessionData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-
-    const loadSession = async () => {
-      const storedSession = typeof window !== "undefined"
-        ? window.localStorage.getItem(`taply-review-session:${shareableId}`)
-        : null;
-
-      if (storedSession) {
-        try {
-          const parsed = JSON.parse(storedSession) as ReviewSessionData;
-          if (active) {
-            setSession(parsed);
-            setLoading(false);
-          }
-          return;
-        } catch {
-          // fall through to backend fallback
-        }
-      }
-
-      try {
-        const response = await fetch(`/api/designs/${encodeURIComponent(shareableId)}`);
-        const result = (await response.json()) as GetDesignResponse & { message?: string };
-
-        if (!response.ok) {
-          throw new Error(result.message || "Failed to load design");
-        }
-
-        if (!active) {
-          return;
-        }
-
-        setSession({
-          shareableId,
-          sessionName: sessionName || "Client Review - round 1",
-          projectName: projectName || "Project name",
-          projectDescription: projectDescription || "",
-          selectedDesignIds: [result.design.id],
-          designs: [
-            {
-              id: result.design.id,
-              shareableId: result.design.shareableId,
-              name: result.design.shareableId,
-              uploadedAt: result.design.createdAt,
-              previewUrl: result.design.imageUrl,
-              imageUrl: result.design.imageUrl,
-            },
-          ],
-        });
-      } catch {
-        if (active) {
-          setSession(null);
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
-    };
-
-    void loadSession();
-
-    return () => {
-      active = false;
-    };
-  }, [projectDescription, projectName, sessionName, shareableId]);
-
-  const shareUrl = useMemo(() => {
-    if (typeof window === "undefined") {
-      return `/review/${shareableId}?view=client`;
-    }
-
-    const title = session?.sessionName ?? sessionName ?? "Session Name";
-    return `${window.location.origin}/review/${shareableId}?view=client&sessionName=${encodeURIComponent(title)}`;
-  }, [session?.sessionName, sessionName, shareableId]);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1400);
-    } catch {
-      // Ignore clipboard failures.
-    }
-  };
+  const { copied, handleCopy, loading, session, shareUrl } = useReviewSession(shareableId, {
+    sessionName,
+    projectName,
+    projectDescription,
+  });
 
   if (loading) {
     return (
@@ -246,9 +151,7 @@ export default function ReviewSessionView({
             </Link>
 
             <div className="pt-[1px]">
-              <h1 className="text-[27px] font-semibold leading-none text-[#111111]">
-                {session.sessionName}
-              </h1>
+              <h1 className="text-[27px] font-semibold leading-none text-[#111111]">{session.sessionName}</h1>
               <p className="mt-[4px] text-[14px] font-normal leading-none text-[#9a9a9a]">
                 {session.projectName}
               </p>
