@@ -10,7 +10,11 @@ import ProjectSection from "@/components/workspace/ProjectSection";
 import ProjectStats from "@/components/workspace/ProjectStats";
 import CreateReviewSessionModal from "@/components/workspace/CreateReviewSessionModal";
 import UploadDesignModal from "@/components/workspace/UploadDesignModal";
+import { usePersistentState } from "@/hooks/usePersistentState";
 import { getDevIdToken } from "@/lib/dev-auth";
+import { writeStoredReviewSession } from "@/lib/review-session-storage";
+import { useWorkspaceProjects } from "@/hooks/useWorkspaceProjects";
+import { useWorkspaceSessions } from "@/hooks/useWorkspaceSessions";
 import imageIcon from "../../public/Icon-assets/image.svg";
 import clipboardTextIcon from "../../public/Icon-assets/clipboard-text.svg";
 import directSendIcon from "../../public/Icon-assets/direct-send.svg";
@@ -19,6 +23,7 @@ import messageRemoveIcon from "../../public/Icon-assets/message-remove.svg";
 import reviewSessionIcon from "../../public/Icon-assets/review session.svg";
 
 type ReviewProjectViewProps = {
+  projectId: string;
   projectName: string;
   projectDescription: string;
 };
@@ -85,6 +90,7 @@ function DesignCard({
 }
 
 export default function ReviewProjectView({
+  projectId,
   projectName,
   projectDescription,
 }: ReviewProjectViewProps) {
@@ -93,8 +99,13 @@ export default function ReviewProjectView({
   const [uploadModalKey, setUploadModalKey] = useState(0);
   const [sessionName, setSessionName] = useState("");
   const [selectedDesignIds, setSelectedDesignIds] = useState<string[]>([]);
-  const [designs, setDesigns] = useState<DesignItem[]>([]);
+  const { value: designs, setValue: setDesigns } = usePersistentState<DesignItem[]>(
+    `taply-project-designs:${projectId}`,
+    [],
+  );
   const router = useRouter();
+  const { addSession } = useWorkspaceSessions();
+  const { removeProjectBySlug } = useWorkspaceProjects();
 
   const stats = [
     {
@@ -153,11 +164,17 @@ export default function ReviewProjectView({
       projectDescription,
       selectedDesignIds: nextSelectedDesignIds,
       designs: selectedDesigns,
+      feedback: [],
     };
 
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(`taply-review-session:${shareableId}`, JSON.stringify(payload));
-    }
+    writeStoredReviewSession(payload);
+    addSession({
+      shareableId,
+      sessionName: payload.sessionName,
+      projectName,
+      projectDescription,
+      selectedDesignIds: nextSelectedDesignIds,
+    });
 
     setIsSessionModalOpen(false);
     router.push(
@@ -216,7 +233,22 @@ export default function ReviewProjectView({
   return (
     <main className="min-h-screen bg-[#fbfbff] text-[#1c1340]">
       <Navbar variant="project" />
-      <ProjectHeaderBar title={projectName} description={projectDescription} />
+      <ProjectHeaderBar
+        title={projectName}
+        description={projectDescription}
+        onDelete={() => {
+          const confirmed = window.confirm(
+            `Delete project "${projectName}"? This will remove its saved designs and sessions from this browser.`,
+          );
+
+          if (!confirmed) {
+            return;
+          }
+
+          removeProjectBySlug(projectId);
+          router.push("/workspace");
+        }}
+      />
 
       <div className="mx-auto w-full max-w-[1110px] px-4 pt-[65px] pb-[120px] xl:px-0">
         <ProjectStats stats={stats} />

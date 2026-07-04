@@ -3,12 +3,14 @@ import WorkspaceProjectCard from "@/components/workspace/WorkspaceProjectCard";
 import type { WorkspaceProject } from "@/hooks/useWorkspaceProjects";
 
 type WorkspaceProjectsProps = {
+  onDeleteProject: (project: WorkspaceProject) => void;
   onNewProjectClick: () => void;
   onProjectClick: (project: WorkspaceProject) => void;
   projects: WorkspaceProject[];
 };
 
 export default function WorkspaceProjects({
+  onDeleteProject,
   onNewProjectClick,
   onProjectClick,
   projects,
@@ -52,7 +54,12 @@ export default function WorkspaceProjects({
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {projects.map((project) => (
-              <WorkspaceProjectCard key={project.id} project={project} onClick={onProjectClick} />
+              <WorkspaceProjectCard
+                key={project.id}
+                project={project}
+                onClick={onProjectClick}
+                onDelete={onDeleteProject}
+              />
             ))}
           </div>
         </div>

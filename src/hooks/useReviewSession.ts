@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import type { DesignItem } from "@/components/workspace/ReviewProjectView";
-import type { GetDesignResponse } from "@/types/taply";
+import type { Feedback, GetDesignResponse } from "@/types/taply";
+import type { StoredReviewDesign } from "@/lib/review-session-storage";
+import { readStoredReviewSession } from "@/lib/review-session-storage";
 
 export type ReviewSessionData = {
   shareableId: string;
@@ -8,7 +9,8 @@ export type ReviewSessionData = {
   projectName: string;
   projectDescription: string;
   selectedDesignIds: string[];
-  designs: DesignItem[];
+  designs: StoredReviewDesign[];
+  feedback: Feedback[];
 };
 
 type ReviewSessionDefaults = {
@@ -26,26 +28,12 @@ export function useReviewSession(shareableId: string, defaults: ReviewSessionDef
     let active = true;
 
     const loadSession = async () => {
-      const storedSession =
-        typeof window !== "undefined"
-          ? window.localStorage.getItem(`taply-review-session:${shareableId}`)
-          : null;
-
-      if (storedSession) {
-        try {
-          const parsed = JSON.parse(storedSession) as ReviewSessionData;
-          if (active) {
-            setSession(parsed);
-            setLoading(false);
-          }
-          return;
-        } catch {
-          // fall through to backend fallback
-        }
-      }
+      const storedSession = readStoredReviewSession(shareableId);
 
       try {
-        const response = await fetch(`/api/designs/${encodeURIComponent(shareableId)}`);
+        const response = await fetch(`/api/designs/${encodeURIComponent(shareableId)}`, {
+          cache: "no-store",
+        });
         const result = (await response.json()) as GetDesignResponse & { message?: string };
 
         if (!response.ok) {
@@ -56,26 +44,34 @@ export function useReviewSession(shareableId: string, defaults: ReviewSessionDef
           return;
         }
 
-        setSession({
+        const fallbackSession: ReviewSessionData = {
           shareableId,
-          sessionName: defaults.sessionName || "Client Review - round 1",
-          projectName: defaults.projectName || "Project name",
-          projectDescription: defaults.projectDescription || "",
-          selectedDesignIds: [result.design.id],
-          designs: [
-            {
-              id: result.design.id,
-              shareableId: result.design.shareableId,
-              name: result.design.shareableId,
-              uploadedAt: result.design.createdAt,
-              previewUrl: result.design.imageUrl,
-              imageUrl: result.design.imageUrl,
-            },
+          sessionName: defaults.sessionName || storedSession?.sessionName || "Client Review - round 1",
+          projectName: defaults.projectName || storedSession?.projectName || "Project name",
+          projectDescription: defaults.projectDescription || storedSession?.projectDescription || "",
+          selectedDesignIds: storedSession?.selectedDesignIds || [result.design.id],
+          designs:
+            storedSession?.designs?.length
+              ? storedSession.designs
+              : [
+                  {
+                    id: result.design.id,
+                    shareableId: result.design.shareableId,
+                    name: result.design.shareableId,
+                    uploadedAt: result.design.createdAt,
+                    previewUrl: result.design.imageUrl,
+                    imageUrl: result.design.imageUrl,
+                  },
           ],
-        });
+          feedback: result.feedback,
+        };
+
+        if (active) {
+          setSession(fallbackSession);
+        }
       } catch {
         if (active) {
-          setSession(null);
+          setSession(storedSession);
         }
       } finally {
         if (active) {
@@ -86,8 +82,13 @@ export function useReviewSession(shareableId: string, defaults: ReviewSessionDef
 
     void loadSession();
 
+    const refreshInterval = window.setInterval(() => {
+      void loadSession();
+    }, 4000);
+
     return () => {
       active = false;
+      window.clearInterval(refreshInterval);
     };
   }, [defaults.projectDescription, defaults.projectName, defaults.sessionName, shareableId]);
 

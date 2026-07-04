@@ -8,6 +8,8 @@ import CreateProjectModal from "@/components/workspace/CreateProjectModal";
 import WorkspaceProjects from "@/components/workspace/WorkspaceProjects";
 import WorkspaceStats from "@/components/workspace/WorkspaceStats";
 import { useWorkspaceProjects } from "@/hooks/useWorkspaceProjects";
+import { useWorkspaceSessions } from "@/hooks/useWorkspaceSessions";
+import { useStoredReviewSessions } from "@/hooks/useStoredReviewSessions";
 import totaliIcon from "../../public/Icon-assets/folder.svg";
 import activeIcon from "../../public/Icon-assets/grammerly.svg";
 import totalFeedback from "../../public/Icon-assets/message-text.svg";
@@ -17,7 +19,9 @@ export default function WorkspacePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
-  const { projects, createProject } = useWorkspaceProjects();
+  const { projects, createProject, removeProject } = useWorkspaceProjects();
+  const { totalSessions } = useWorkspaceSessions();
+  const { totalFeedback: storedTotalFeedback } = useStoredReviewSessions();
 
   const stats = useMemo(
     () => [
@@ -28,16 +32,16 @@ export default function WorkspacePage() {
       },
       {
         label: "Active Sessions",
-        value: "0",
+        value: String(totalSessions),
         icon: activeIcon,
       },
       {
         label: "Total Feedback",
-        value: "0",
+        value: String(storedTotalFeedback),
         icon: totalFeedback,
       },
     ],
-    [projects.length],
+    [projects.length, storedTotalFeedback, totalSessions],
   );
 
   const handleCreateProject = () => {
@@ -56,6 +60,15 @@ export default function WorkspacePage() {
           projects={projects}
           onNewProjectClick={() => setIsModalOpen(true)}
           onProjectClick={(project) => router.push(project.reviewUrl)}
+          onDeleteProject={(project) => {
+            const confirmed = window.confirm(`Delete project "${project.name}"? This will remove its saved designs and sessions from this browser.`);
+
+            if (!confirmed) {
+              return;
+            }
+
+            removeProject(project.id);
+          }}
         />
       </div>
 

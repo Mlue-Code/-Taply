@@ -41,6 +41,31 @@ function StatCard({
   );
 }
 
+function FeedbackBadge({
+  index,
+  x,
+  y,
+}: {
+  index: number;
+  x: number;
+  y: number;
+}) {
+  return (
+    <button
+      type="button"
+      className="absolute flex h-7 w-7 items-center justify-center rounded-full bg-[#6f2cf6] text-[12px] font-semibold text-white shadow-[0_10px_18px_rgba(111,44,246,0.28)]"
+      style={{
+        left: `${x * 100}%`,
+        top: `${y * 100}%`,
+        transform: "translate(-50%, -50%)",
+      }}
+      title={`Feedback ${index + 1}`}
+    >
+      {index + 1}
+    </button>
+  );
+}
+
 export default function ReviewSessionView({
   shareableId,
   sessionName,
@@ -52,6 +77,9 @@ export default function ReviewSessionView({
     projectName,
     projectDescription,
   });
+  const feedbackItems = session?.feedback ?? [];
+  const orderedFeedbackItems = [...feedbackItems].reverse();
+  const totalFeedback = String(feedbackItems.length);
 
   if (loading) {
     return (
@@ -106,7 +134,7 @@ export default function ReviewSessionView({
   const feedbackStats = [
     {
       title: "Total Feedback",
-      value: "0",
+      value: totalFeedback,
       icon: <AssetIcon src={messages3Icon} className="h-[42px] w-[42px]" />,
       tone: "bg-[#f5f0ff]",
     },
@@ -198,7 +226,7 @@ export default function ReviewSessionView({
           <h2 className="text-[22px] font-medium text-[#111111]">Selected Designs</h2>
 
           <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-[repeat(auto-fit,392px)]">
-            {session.designs.map((item) => (
+            {session.designs.map((item, designIndex) => (
               <article
                 key={item.id}
                 className="flex h-[304px] w-full flex-col overflow-hidden rounded-[13px] border border-[#ece6f7] bg-white shadow-[0_16px_34px_rgba(26,15,54,0.12)]"
@@ -206,6 +234,16 @@ export default function ReviewSessionView({
                 <div className="relative h-[232px] overflow-hidden bg-[#f7f2ff]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={item.previewUrl} alt={item.name} className="h-full w-full object-cover" />
+                  {designIndex === 0
+                    ? feedbackItems.map((feedback, index) => (
+                        <FeedbackBadge
+                          key={feedback.id}
+                          index={index}
+                          x={feedback.x}
+                          y={feedback.y}
+                        />
+                      ))
+                    : null}
                 </div>
                 <div className="px-4 py-4">
                   <h3 className="truncate text-[16px] font-semibold text-[#121212]">{item.name}</h3>
@@ -217,13 +255,87 @@ export default function ReviewSessionView({
         </section>
 
         <section className="mt-14">
+          <h2 className="text-[22px] font-medium text-[#111111]">Design Feedback</h2>
+
+          <div className="mt-5 rounded-[16px] border border-[#e3d6ff] bg-white px-5 py-5 shadow-[0_8px_20px_rgba(26,15,54,0.06)]">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
+              <div className="w-full max-w-[392px] overflow-hidden rounded-[13px] border border-[#ece6f7] bg-white">
+                <div className="relative h-[232px] overflow-hidden bg-[#f7f2ff]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={design.previewUrl} alt={design.name} className="h-full w-full object-cover" />
+                </div>
+                <div className="px-4 py-4">
+                  <h3 className="truncate text-[16px] font-semibold text-[#121212]">{design.name}</h3>
+                  <p className="mt-1 text-[12px] text-[#8a8494]">Uploaded {design.uploadedAt}</p>
+                </div>
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-4">
+                  <h3 className="text-[18px] font-semibold text-[#111111]">Feedback list</h3>
+                  <span className="text-[13px] text-[#7f7397]">
+                    {orderedFeedbackItems.length} item{orderedFeedbackItems.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+
+                {orderedFeedbackItems.length === 0 ? (
+                  <p className="mt-4 text-[13px] text-[#7f7397]">
+                    No feedback has been submitted for this design yet.
+                  </p>
+                ) : (
+                  <div className="mt-4 grid gap-3">
+                    {orderedFeedbackItems.map((item, index) => (
+                      <article
+                        key={item.id}
+                        className="flex items-start justify-between gap-4 rounded-[14px] bg-[#faf7ff] px-4 py-3"
+                      >
+                        <div className="min-w-0">
+                          <div className="text-[13px] font-semibold text-[#6f2cf6]">
+                            Comment {index + 1}
+                          </div>
+                          <p className="mt-1 text-[14px] leading-6 text-[#1a1722]">{item.comment}</p>
+                        </div>
+                        <div className="shrink-0 text-right text-[11px] text-[#827896]">
+                          <div>{Math.round(item.x * 100)}% x</div>
+                          <div>{Math.round(item.y * 100)}% y</div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-14">
           <h2 className="text-[22px] font-medium text-[#111111]">Feedback Details</h2>
 
-          <div className="mt-5 flex min-h-[335px] flex-col items-center justify-center rounded-[16px] border-2 border-dashed border-[#dccfff] bg-[#faf7ff] text-center">
-            <AssetIcon src={infoCircleIcon} className="h-[52px] w-[52px]" />
-            <h3 className="mt-5 text-[18px] font-medium text-[#111111]">No feedback yet</h3>
-            <p className="mt-2 text-[12px] text-[#777]">Share the review link to start collecting feedback</p>
-          </div>
+          {feedbackItems.length === 0 ? (
+            <div className="mt-5 flex min-h-[335px] flex-col items-center justify-center rounded-[16px] border-2 border-dashed border-[#dccfff] bg-[#faf7ff] text-center">
+              <AssetIcon src={infoCircleIcon} className="h-[52px] w-[52px]" />
+              <h3 className="mt-5 text-[18px] font-medium text-[#111111]">No feedback yet</h3>
+              <p className="mt-2 text-[12px] text-[#777]">Share the review link to start collecting feedback</p>
+            </div>
+          ) : (
+            <div className="mt-5 grid gap-4">
+              {feedbackItems.map((feedback, index) => (
+                <article
+                  key={feedback.id}
+                  className="flex items-start justify-between gap-4 rounded-[16px] border border-[#e3d6ff] bg-[#faf7ff] px-5 py-4 shadow-[0_8px_20px_rgba(26,15,54,0.06)]"
+                >
+                  <div className="min-w-0">
+                    <div className="text-[14px] font-medium text-[#111111]">Feedback {index + 1}</div>
+                    <p className="mt-1 text-[13px] leading-6 text-[#4d4d58]">{feedback.comment}</p>
+                  </div>
+                  <div className="shrink-0 text-right text-[12px] text-[#7b6f9b]">
+                    <div>{Math.round(feedback.x * 100)}% x</div>
+                    <div>{Math.round(feedback.y * 100)}% y</div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="mt-14">

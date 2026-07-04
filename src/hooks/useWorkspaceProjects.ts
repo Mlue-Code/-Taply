@@ -1,5 +1,8 @@
 import { useMemo } from "react";
 import { usePersistentState } from "@/hooks/usePersistentState";
+import {
+  removeStoredReviewSessionsByProject,
+} from "@/lib/review-session-storage";
 
 export type WorkspaceProject = {
   id: string;
@@ -64,9 +67,37 @@ export function useWorkspaceProjects() {
     return { createdProject, reviewUrl };
   };
 
+  const removeProject = (projectId: string) => {
+    const projectToRemove = projects.find((project) => project.id === projectId);
+
+    setValue((current) => current.filter((project) => project.id !== projectId));
+
+    if (!projectToRemove || typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.removeItem(`taply-project-designs:${projectToRemove.slug}`);
+    removeStoredReviewSessionsByProject(projectToRemove.name, projectToRemove.description);
+  };
+
+  const removeProjectBySlug = (slug: string) => {
+    const projectToRemove = projects.find((project) => project.slug === slug);
+
+    setValue((current) => current.filter((project) => project.slug !== slug));
+
+    if (!projectToRemove || typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.removeItem(`taply-project-designs:${projectToRemove.slug}`);
+    removeStoredReviewSessionsByProject(projectToRemove.name, projectToRemove.description);
+  };
+
   return {
     projects,
     createProject,
+    removeProject,
+    removeProjectBySlug,
     setProjects: setValue,
     totalProjects: projects.length,
     workspaceStats: stats,
