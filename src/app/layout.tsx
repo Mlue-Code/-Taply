@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Mono, Inter } from "next/font/google";
 import "./globals.css";
-
 const sans = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
