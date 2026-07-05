@@ -4,11 +4,12 @@ import leftIcon from "../../public/Icon-assets/left.svg";
 import trashIcon from "../../public/Icon-assets/trash.svg";
 
 type ProjectHeaderBarProps = {
+  onDelete?: () => void;
   title: string;
   description: string;
 };
 
-export default function ProjectHeaderBar({ title, description }: ProjectHeaderBarProps) {
+export default function ProjectHeaderBar({ onDelete, title, description }: ProjectHeaderBarProps) {
   return (
     <section className="border-b border-[#e9e5f0] bg-white">
       <div className="mx-auto flex h-[76px] w-full max-w-[1110px] items-center justify-between px-4 xl:px-0">
@@ -33,6 +34,8 @@ export default function ProjectHeaderBar({ title, description }: ProjectHeaderBa
 
         <button
           type="button"
+          onClick={onDelete}
+          disabled={!onDelete}
           className="inline-flex items-center gap-2 text-[18px] font-medium text-[#ff2b1f]"
         >
           <AssetIcon src={trashIcon} className="h-[18px] w-[18px]" />

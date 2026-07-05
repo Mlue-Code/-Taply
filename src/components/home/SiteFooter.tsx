@@ -23,6 +23,7 @@ export default function SiteFooter({ variant = "home" }: SiteFooterProps) {
 
         <nav className="mt-6 flex flex-wrap items-center justify-center gap-8 text-[14px]">
           <a href="#about">About</a>
+          <a href="/how-it-works">How it works</a>
           <a href="#services">Other services</a>
           <a href="#support">Support</a>
           <a href="#contact">Contact us</a>

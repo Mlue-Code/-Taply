@@ -38,5 +38,11 @@ export default async function ReviewShareablePage({ params, searchParams }: Revi
     return <ClientReviewView shareableId={resolvedParams.shareableId} sessionName={sessionName || undefined} />;
   }
 
-  return <ReviewProjectView projectName={projectName} projectDescription={projectDescription} />;
+  return (
+    <ReviewProjectView
+      projectId={resolvedParams.shareableId}
+      projectName={projectName}
+      projectDescription={projectDescription}
+    />
+  );
 }

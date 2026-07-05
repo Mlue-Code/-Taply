@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AssetIcon from "../shared/AssetIcon";
 import arrowRight from "../../public/Icon-assets/arrow-right.svg";
@@ -5,6 +8,8 @@ import ghost from "../../public/Icon-assets/ghost.svg";
 import SocialLinks from "./SocialLinks";
 
 export default function HeroSection() {
+  const router = useRouter();
+
   return (
     <section className="relative z-10 mx-auto flex max-w-[940px] flex-col items-center px-6 pb-16 pt-14 text-center">
       <span className="inline-flex items-center gap-2 rounded-full bg-violet-50 px-5 py-2 text-[12px] font-semibold text-text-primary shadow-[0_0_0_1px_rgba(112,33,248,0.03)]">
@@ -33,12 +38,13 @@ export default function HeroSection() {
           Get Started
           <AssetIcon src={arrowRight} className="h-[12px] w-[12px]" />
         </Link>
-        <a
-          href="#how-it-works"
+        <button
+          type="button"
+          onClick={() => router.push("/how-it-works")}
           className="inline-flex h-[34px] items-center rounded-[8px] border border-[#d8d6de] bg-white px-5 text-[13px] font-semibold text-[#2a2830] transition hover:border-border-strong"
         >
           See How it works
-        </a>
+        </button>
       </div>
 
       <SocialLinks />
