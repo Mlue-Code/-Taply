@@ -33,12 +33,12 @@ export default function HeroSection() {
           Get Started
           <AssetIcon src={arrowRight} className="h-[12px] w-[12px]" />
         </Link>
-        <a
-          href="#how-it-works"
+        <Link
+          href="/how-it-works"
           className="inline-flex h-[34px] items-center rounded-[8px] border border-[#d8d6de] bg-white px-5 text-[13px] font-semibold text-[#2a2830] transition hover:border-border-strong"
         >
           See How it works
-        </a>
+        </Link>
       </div>
 
       <SocialLinks />
