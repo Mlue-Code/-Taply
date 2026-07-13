@@ -7,6 +7,7 @@
 export interface Design {
   id: string;
   shareableId: string;
+  name: string;
   imageUrl: string;
   publicId: string;
   creatorUid: string;
@@ -26,6 +27,7 @@ export interface Feedback {
 export interface UploadDesignResponse {
   id: string;
   shareableId: string;
+  name: string;
   imageUrl: string;
   createdAt: string;
 }

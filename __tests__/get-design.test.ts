@@ -40,6 +40,7 @@ const mockDesignDoc = {
   },
   data: () => ({
     shareableId: "valid-shareable-id",
+    name: "Test Design",
     imageUrl: "https://res.cloudinary.com/test/image.jpg",
     publicId: "taply/designs/test",
     creatorUid: "user-123",
@@ -195,6 +196,7 @@ describe("GET /api/designs/[shareableId]", () => {
 
       expect(data.design).toHaveProperty("id");
       expect(data.design).toHaveProperty("shareableId");
+      expect(data.design).toHaveProperty("name");
       expect(data.design).toHaveProperty("imageUrl");
       expect(data.design).toHaveProperty("publicId");
       expect(data.design).toHaveProperty("creatorUid");

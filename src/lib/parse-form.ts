@@ -9,19 +9,27 @@ export interface ParsedFile {
   size: number;
 }
 
+export interface ParsedForm {
+  file: ParsedFile;
+  fields: {
+    name?: string;
+    [key: string]: string | undefined;
+  };
+}
+
 /**
- * Parses multipart/form-data and extracts the uploaded file.
+ * Parses multipart/form-data and extracts the uploaded file AND form fields.
  *
  * @param req - Next.js request
- * @returns The uploaded file as a Buffer
+ * @returns The uploaded file as a Buffer plus any extra fields
  */
-export async function parseFormFile(req: NextApiRequest): Promise<ParsedFile> {
+export async function parseFormFile(req: NextApiRequest): Promise<ParsedForm> {
   const form = formidable({
     maxFileSize: 10 * 1024 * 1024,
     keepExtensions: true,
   });
 
-  const [, files] = await form.parse(req);
+  const [fields, files] = await form.parse(req);
 
   const fileArray = files.image;
   if (!fileArray || fileArray.length === 0) {
@@ -34,14 +42,27 @@ export async function parseFormFile(req: NextApiRequest): Promise<ParsedFile> {
   if (!mimeType.startsWith("image/")) {
     throw new Error("Only image files are allowed");
   }
-  const buffer = await fs.readFile(file.filepath);
 
+  const buffer = await fs.readFile(file.filepath);
   await fs.unlink(file.filepath).catch(() => {});
 
+  // ─── Extract Fields ───
+  // formidable returns fields as arrays, we take the first value
+  const parsedFields: ParsedForm["fields"] = {};
+
+  for (const [key, value] of Object.entries(fields)) {
+    if (Array.isArray(value) && value.length > 0) {
+      parsedFields[key] = value[0];
+    }
+  }
+
   return {
-    buffer,
-    mimeType,
-    fileName: file.originalFilename || "design.jpg",
-    size: file.size,
+    file: {
+      buffer,
+      mimeType,
+      fileName: file.originalFilename || "design.jpg",
+      size: file.size,
+    },
+    fields: parsedFields,
   };
 }

@@ -40,6 +40,7 @@ export default async function handler(
     const design: Design = {
       id: designDoc.id,
       shareableId: designData.shareableId,
+      name: designData.name || "Untitled Design",
       imageUrl: designData.imageUrl,
       publicId: designData.publicId,
       creatorUid: designData.creatorUid,

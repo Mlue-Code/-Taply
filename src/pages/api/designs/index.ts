@@ -41,6 +41,7 @@ export default async function handler(
   }
 
   try {
+    // ─── Authentication ───
     const auth = await verifyAuth(req);
     if (!auth.success || !auth.uid) {
       return sendError(
@@ -51,16 +52,25 @@ export default async function handler(
       );
     }
 
-    let file;
+    // ─── Parse Form (file + fields) ───
+    let parsedForm;
     try {
-      file = await parseFormFile(req);
+      parsedForm = await parseFormFile(req);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Invalid file";
       return sendError(res, 400, "VALIDATION_ERROR", message);
     }
+
+    // ─── Get Name from Fields ───
+    // Use the name sent by frontend, fallback to original filename
+    const designName =
+      parsedForm.fields.name?.trim() ||
+      parsedForm.file.fileName.replace(/\.[^.]+$/, "") ||
+      "Untitled Design";
+
     let uploadResult;
     try {
-      uploadResult = await uploadImage(file.buffer, "taply/designs");
+      uploadResult = await uploadImage(parsedForm.file.buffer, "taply/designs");
     } catch (error) {
       console.error("Cloudinary upload failed:", error);
       return sendError(res, 500, "INTERNAL_ERROR", "Failed to upload image");
@@ -68,8 +78,10 @@ export default async function handler(
 
     const shareableId = createId();
     const now = new Date().toISOString();
+
     const designData = {
       shareableId,
+      name: designName,
       imageUrl: uploadResult.url,
       publicId: uploadResult.publicId,
       creatorUid: auth.uid,
@@ -77,9 +89,12 @@ export default async function handler(
     };
 
     const docRef = await adminDb.collection("designs").add(designData);
+
+    // ─── Return Response ───
     return res.status(201).json({
       id: docRef.id,
       shareableId,
+      name: designName,
       imageUrl: uploadResult.url,
       createdAt: now,
     });
