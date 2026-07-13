@@ -6,9 +6,15 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  // ─── BLOCK IN PRODUCTION ───
+  // This endpoint must never be accessible in production
+  if (process.env.NODE_ENV === "production") {
+    return sendError(res, 404, "NOT_FOUND", "Not found");
+  }
+
   if (!allowMethod(req.method, "GET", res)) return;
 
-  // Security: Only allow with secret key
+  // ─── Security: Only allow with secret key ───
   const secret = req.query.secret;
   const expectedSecret = process.env.DEV_TOKEN_SECRET;
 
@@ -17,7 +23,7 @@ export default async function handler(
       res,
       500,
       "INTERNAL_ERROR",
-      "DEV_TOKEN_SECRET not configured",
+      "DEV_TOKEN_SECRET not configured. Add it to your .env.local file.",
     );
   }
 
@@ -29,7 +35,7 @@ export default async function handler(
     const testUid = "test-user-dev-12345";
     const testEmail = "test@taply.dev";
 
-    // Create or update test user
+    // ─── Create or Get Test User ───
     try {
       await adminAuth.getUser(testUid);
     } catch {
@@ -40,18 +46,18 @@ export default async function handler(
       });
     }
 
-    // Create custom token
+    // ─── Create Custom Token ───
     const customToken = await adminAuth.createCustomToken(testUid);
 
-    // Exchange custom token for ID token using Firebase REST API
+    // ─── Exchange for ID Token ───
     const firebaseApiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 
     if (!firebaseApiKey) {
       return res.status(200).json({
-        message: "Custom token created, but couldn't exchange for ID token",
+        message: "Custom token created but could not exchange for ID token",
         customToken,
         uid: testUid,
-        note: "NEXT_PUBLIC_FIREBASE_API_KEY is missing",
+        note: "NEXT_PUBLIC_FIREBASE_API_KEY is missing from .env.local",
       });
     }
 
