@@ -13,6 +13,7 @@ import UploadDesignModal from "@/components/workspace/UploadDesignModal";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { getDevIdToken } from "@/lib/dev-auth";
 import { writeStoredReviewSession } from "@/lib/review-session-storage";
+import type { StoredReviewDesign } from "@/lib/review-session-storage";
 import { useWorkspaceProjects } from "@/hooks/useWorkspaceProjects";
 import { useWorkspaceSessions } from "@/hooks/useWorkspaceSessions";
 import imageIcon from "../../public/Icon-assets/image.svg";
@@ -26,15 +27,6 @@ type ReviewProjectViewProps = {
   projectId: string;
   projectName: string;
   projectDescription: string;
-};
-
-export type DesignItem = {
-  id: string;
-  shareableId: string;
-  name: string;
-  uploadedAt: string;
-  previewUrl: string;
-  imageUrl: string;
 };
 
 function formatUploadedAt(date: Date) {
@@ -57,7 +49,7 @@ function DesignCard({
   design,
   onRemove,
 }: {
-  design: DesignItem;
+  design: StoredReviewDesign;
   onRemove: () => void;
 }) {
   return (
@@ -99,7 +91,7 @@ export default function ReviewProjectView({
   const [uploadModalKey, setUploadModalKey] = useState(0);
   const [sessionName, setSessionName] = useState("");
   const [selectedDesignIds, setSelectedDesignIds] = useState<string[]>([]);
-  const { value: designs, setValue: setDesigns } = usePersistentState<DesignItem[]>(
+  const { value: designs, setValue: setDesigns } = usePersistentState<StoredReviewDesign[]>(
     `taply-project-designs:${projectId}`,
     [],
   );
