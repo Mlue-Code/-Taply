@@ -207,7 +207,7 @@ export default function ReviewProjectView({
         {
           id: result.id,
           shareableId: result.shareableId,
-          name: name.trim() || stripExtension(file.name),
+          name: result.name,
           uploadedAt: formatUploadedAt(new Date(result.createdAt)),
           previewUrl: result.imageUrl,
           imageUrl: result.imageUrl,
