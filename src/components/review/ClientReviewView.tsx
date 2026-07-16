@@ -7,6 +7,7 @@ import Navbar from "@/components/layout/Navbar";
 import AssetIcon from "@/components/shared/AssetIcon";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { readStoredReviewSession, updateStoredReviewSession } from "@/lib/review-session-storage";
+import type { StoredReviewDesign } from "@/lib/review-session-storage";
 import type { Feedback, GetDesignResponse } from "@/types/taply";
 import cursorIcon from "../../public/Icon-assets/cursor.svg";
 import arrowDownIcon from "../../public/Icon-assets/arrow-down.svg";
@@ -48,15 +49,6 @@ type ReviewToolState = {
 };
 
 type ToolbarTool = "cursor" | "add" | "pin" | "pen" | "comment";
-
-type ReviewDesign = {
-  id: string;
-  shareableId: string;
-  name: string;
-  uploadedAt: string;
-  previewUrl: string;
-  imageUrl: string;
-};
 
 function ToolButton({
   icon,
@@ -107,7 +99,7 @@ function makeId() {
 }
 
 export default function ClientReviewView({ shareableId, sessionName }: ClientReviewViewProps) {
-  const [designs, setDesigns] = useState<ReviewDesign[]>([]);
+  const [designs, setDesigns] = useState<StoredReviewDesign[]>([]);
   const [selectedDesignIndex, setSelectedDesignIndex] = useState(0);
   const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
@@ -181,7 +173,7 @@ export default function ClientReviewView({ shareableId, sessionName }: ClientRev
           {
             id: result.design.id,
             shareableId: result.design.shareableId,
-            name: result.design.shareableId,
+            name: result.design.name,
             uploadedAt: result.design.createdAt,
             previewUrl: result.design.imageUrl,
             imageUrl: result.design.imageUrl,

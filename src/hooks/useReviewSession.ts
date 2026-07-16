@@ -57,7 +57,7 @@ export function useReviewSession(shareableId: string, defaults: ReviewSessionDef
                   {
                     id: result.design.id,
                     shareableId: result.design.shareableId,
-                    name: result.design.shareableId,
+                    name: result.design.name,
                     uploadedAt: result.design.createdAt,
                     previewUrl: result.design.imageUrl,
                     imageUrl: result.design.imageUrl,
